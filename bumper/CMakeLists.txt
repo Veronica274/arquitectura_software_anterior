@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(proyecto_1)
+project(bumper)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -7,6 +7,7 @@ project(proyecto_1)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
@@ -15,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   kobuki_msgs
   sensor_msgs
 )
+
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -105,6 +107,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
+
 catkin_package(
   
   CATKIN_DEPENDS roscpp std_msgs kobuki_msgs sensor_msgs
@@ -115,16 +118,19 @@ catkin_package(
 #  DEPENDS system_lib
 )
 
+
 ###########
 ## Build ##
 ###########
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
+
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
 )
+
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
@@ -155,6 +161,7 @@ include_directories(
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
+
 add_executable(bumper_robot src/bumper_robot.cpp)
 target_link_libraries(bumper_robot ${catkin_LIBRARIES})
 
@@ -216,3 +223,4 @@ roslint_cpp(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
