@@ -1,0 +1,37 @@
+cmake_minimum_required(VERSION 3.0.2)
+project(bumper)
+
+
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  rospy
+  std_msgs
+  roslint
+  kobuki_msgs
+  sensor_msgs
+)
+
+
+catkin_package(
+  
+  CATKIN_DEPENDS roscpp std_msgs kobuki_msgs sensor_msgs
+
+#  INCLUDE_DIRS include
+#  LIBRARIES proyecto_1
+#  CATKIN_DEPENDS roscpp rospy std_msgs
+#  DEPENDS system_lib
+)
+
+
+include_directories(
+# include
+  ${catkin_INCLUDE_DIRS}
+)
+
+
+add_executable(bumper_robot src/bumper_robot.cpp)
+target_link_libraries(bumper_robot ${catkin_LIBRARIES})
+
+roslint_cpp(
+ src/bumper_robot.cpp
+)
