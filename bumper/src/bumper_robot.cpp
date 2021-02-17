@@ -63,7 +63,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "bumper_robot");
   BumperRobot bumperrobot;
 
-  ros::Rate loop_rate(5);
+  ros::Rate loop_rate(20);
 
   while (ros::ok())
   {
