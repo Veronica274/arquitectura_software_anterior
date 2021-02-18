@@ -20,7 +20,10 @@ include_directories(
 )
 
 add_executable(bumper_robot src/bumper_robot.cpp)
+add_executable(bumper_new_version src/bumper_new_version.cpp)
+
 target_link_libraries(bumper_robot ${catkin_LIBRARIES})
+target_link_libraries(bumper_new_version ${catkin_LIBRARIES})
 
 roslint_cpp(
  src/bumper_robot.cpp
