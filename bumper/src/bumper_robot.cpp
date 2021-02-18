@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 #include "ros/ros.h"
 #include "kobuki_msgs/BumperEvent.h"
 #include "geometry_msgs/Twist.h"
@@ -43,7 +42,7 @@ public:
       vel.linear.x = 0.0;
     }
     else if (!bumper_pressed_){
-      vel.linear.x = 2.0;
+      vel.linear.x = 0.3;
     }
 
     vel_pub_.publish(vel);
