@@ -15,51 +15,45 @@
 #include "ros/ros.h"
 #include "kobuki_msgs/BumperEvent.h"
 #include "geometry_msgs/Twist.h"
-
-#define BACKWARD_TIME 2.0
-
 class BumperRobot
 {
-public:
-  BumperRobot()
-  {
-    bumper_pressed_ = false;
-    vel_pub_ = n_.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 1);
-    bumper_sub_ = n_.subscribe("/mobile_base/events/bumper", 1, &BumperRobot::messageCallback, this);
-  }
-  void messageCallback(const kobuki_msgs::BumperEvent::ConstPtr& msg)
-  {
-    bumper_pressed_ = msg->state == kobuki_msgs::BumperEvent::PRESSED;
-    if (bumper_pressed_) { bumper_pressed_ = true; }
+  public:
+    BumperRobot(){
+      bumper_pressed = false;
 
-    else if (!bumper_pressed_) { bumper_pressed_ = false; }
-  }
+      vel_pub_ = n_.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 1);
+      bumper_sub_ = n_.subscribe("/mobile_base/events/bumper", 1, &BumperRobot::messageCallback, this);
 
-  void actions()
+    }
+
+    void messageCallback(const kobuki_msgs::BumperEvent::ConstPtr& msg)
   {
+    bumper_pressed = msg->bumper;
+    if(bumper_pressed){bumper_pressed= true;}
+    else if(bumper_pressed = false){
+      bumper_pressed = false;
+    }
+  }
+  void actions(){
+
     geometry_msgs::Twist vel;
-
-    if (bumper_pressed_)
-    {
+    if(bumper_pressed){
       vel.linear.x = 0.0;
     }
-    else if (!bumper_pressed_)
-    {
+    else{
       vel.linear.x = 0.3;
     }
-
     vel_pub_.publish(vel);
   }
 
-private:
-  ros::NodeHandle n_;
 
-  bool bumper_pressed_;
+  private:
+    bool bumper_pressed;
+    ros::NodeHandle n_;
+    ros::Subscriber bumper_sub_;
+    ros::Publisher vel_pub_;
 
-  ros::Subscriber bumper_sub_;
-  ros::Publisher vel_pub_;
 };
-
 
 int main(int argc, char **argv)
 {
@@ -70,8 +64,8 @@ int main(int argc, char **argv)
 
   while (ros::ok())
   {
-    bumperrobot.actions();
 
+    bumperrobot.actions();
     ros::spinOnce();
     loop_rate.sleep();
   }
