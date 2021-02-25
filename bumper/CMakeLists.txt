@@ -27,4 +27,5 @@ target_link_libraries(bumper_new_version ${catkin_LIBRARIES})
 
 roslint_cpp(
  src/bumper_robot.cpp
+ src/bumper_new_version.cpp
 )

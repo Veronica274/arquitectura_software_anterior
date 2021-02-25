@@ -16,8 +16,6 @@
 #include "kobuki_msgs/BumperEvent.h"
 #include "geometry_msgs/Twist.h"
 
-#define BACKWARD_TIME 2.0
-
 class BumperRobot
 {
 public:
@@ -30,9 +28,15 @@ public:
   void messageCallback(const kobuki_msgs::BumperEvent::ConstPtr& msg)
   {
     bumper_pressed_ = msg->state == kobuki_msgs::BumperEvent::PRESSED;
-    if (bumper_pressed_) { bumper_pressed_ = true; }
 
-    else if (!bumper_pressed_) { bumper_pressed_ = false; }
+    if (bumper_pressed_)
+    {
+      bumper_pressed_ = true;
+    }
+    else if (!bumper_pressed_)
+    {
+      bumper_pressed_ = false;
+    }
   }
 
   void actions()
