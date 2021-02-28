@@ -20,6 +20,7 @@
 
 #define TURNING_TIME 5.0
 #define BACKING_TIME 3.0
+#define MIN_DIST 0.3;
 
 class LaserGo
 {
@@ -32,7 +33,14 @@ public:
 
   void laserCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
   {
-    
+    centro_ = msg->ranges[msg->ranges.size()/2]<MIN_DIST;//si recibimos que en el array en la posicion
+    izquierda_ = msg->ranges[msg->angle_min+(M_PI/msg->angle_increment)]<MIN_DIST;
+    derecha_ = msg->ranges[msg->angle_min-(M_PI/msg->angle_increment)]<MIN_DIST;
+    pressed_ = (centro_ || derecha_);
+
+    ROS_INFO("Data centro: [%i]",centro_);
+    ROS_INFO("Data derecha: [%i]",derecha_);
+    ROS_INFO("Data izquierda: [%i]",izquierda_);
   }
 
     //Las variables y estructura se modificarán para que funcione con el laser y no con el bumper
@@ -43,7 +51,8 @@ public:
     switch (state_)
     {
     case GOING_FORWARD:
-
+      cmd.linear.x=0.3;
+      cmd.angular.z=0.0;
       if (pressed_)
       {
         press_ts_ = ros::Time::now();
@@ -54,7 +63,8 @@ public:
 
     case GOING_BACK:
 
-
+      cmd.linear.x=-0.3;
+      cmd.angular.z=0.0;
       if ((ros::Time::now() - press_ts_).toSec() > BACKING_TIME )
       {
         turn_ts_ = ros::Time::now();
@@ -64,6 +74,8 @@ public:
       break;
 
     case TURNING:
+      cmd.linear.x=0.0;
+      cmd.angular.z=0.3;
       if ((ros::Time::now()-turn_ts_).toSec() > TURNING_TIME )
       {
         state_ = GOING_FORWARD;
@@ -71,6 +83,7 @@ public:
       }
       break;
     }
+    pub_vel_.publish(cmd);
   }
 
 private:
@@ -82,6 +95,7 @@ private:
 
   int state_;
 
+  bool centro_, derecha_, izquierda_;
   bool pressed_;
 
   ros::Time press_ts_;
