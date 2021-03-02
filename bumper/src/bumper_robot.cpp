@@ -12,38 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 #include "ros/ros.h"
 #include "kobuki_msgs/BumperEvent.h"
 #include "geometry_msgs/Twist.h"
 
-#define BACKWARD_TIME 2.0
-
 class BumperRobot
 {
 public:
-  BumperRobot() {
+  BumperRobot()
+  {
     bumper_pressed_ = false;
     vel_pub_ = n_.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 1);
     bumper_sub_ = n_.subscribe("/mobile_base/events/bumper", 1, &BumperRobot::messageCallback, this);
-
   }
-  void messageCallback(const kobuki_msgs::BumperEvent::ConstPtr& msg){
+  void messageCallback(const kobuki_msgs::BumperEvent::ConstPtr& msg)
+  {
     bumper_pressed_ = msg->state == kobuki_msgs::BumperEvent::PRESSED;
-    if (bumper_pressed_) { bumper_pressed_ = true; }
 
-    else if (!bumper_pressed_){ bumper_pressed_ = false; }
+    if (bumper_pressed_)
+    {
+      bumper_pressed_ = true;
+    }
+    else if (!bumper_pressed_)
+    {
+      bumper_pressed_ = false;
+    }
   }
 
   void actions()
   {
     geometry_msgs::Twist vel;
 
-    if (bumper_pressed_) {
+    if (bumper_pressed_)
+    {
       vel.linear.x = 0.0;
     }
-    else if (!bumper_pressed_){
-      vel.linear.x = 2.0;
+    else if (!bumper_pressed_)
+    {
+      vel.linear.x = 0.3;
     }
 
     vel_pub_.publish(vel);
