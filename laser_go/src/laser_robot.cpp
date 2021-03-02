@@ -33,14 +33,16 @@ public:
 
   void laserCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
   {
-    centro_ = msg->ranges[msg->ranges.size()/2]<MIN_DIST;//si recibimos que en el array en la posicion
-    izquierda_ = msg->ranges[msg->angle_min+(M_PI/msg->angle_increment)]<MIN_DIST;
-    derecha_ = msg->ranges[msg->angle_min-(M_PI/msg->angle_increment)]<MIN_DIST;
-    pressed_ = (centro_ || derecha_);
-
-    ROS_INFO("Data centro: [%i]",centro_);
-    ROS_INFO("Data derecha: [%i]",derecha_);
-    ROS_INFO("Data izquierda: [%i]",izquierda_);
+    //En esta variable almacenaremos los grados del centro para que nos sea mas fácil operar con ángulos
+    grados_centro = msg->ranges.size()/2 * msg->angle_increment * (-1);
+    centro_ = msg->ranges[msg->ranges.size()/2] < MIN_DIST;
+    izquierda_ = msg->ranges[(grados_centro - (M_PI/5))/((-1)*msg->angle_increment)] < MIN_DIST;
+    derecha_ = msg->ranges[(grados_centro + (M_PI/5))/((-1)*msg->angle_increment)] < MIN_DIST;
+    pressed_ = (centro_ || derecha_ || izquierda_);
+    
+    ROS_INFO("Data centro: [%i][%f][%ld]",centro_, msg->ranges[msg->ranges.size()/2], msg->ranges.size()/2);
+    ROS_INFO("Data derecha: [%i][%f][%f]",derecha_, msg->ranges[(grados_centro + (M_PI/5))/((-1)*msg->angle_increment)], (grados_centro + (M_PI/5))/((-1)*msg->angle_increment));
+    ROS_INFO("Data izquierda: [%i][%f][%f]",izquierda_, msg->ranges[(grados_centro - (M_PI/5))/((-1)*msg->angle_increment)], (grados_centro - (M_PI/5))/((-1)*msg->angle_increment));
   }
 
     //Las variables y estructura se modificarán para que funcione con el laser y no con el bumper
@@ -83,7 +85,7 @@ public:
       }
       break;
     }
-    pub_vel_.publish(cmd);
+    //pub_vel_.publish(cmd);
   }
 
 private:
@@ -95,6 +97,7 @@ private:
 
   int state_;
 
+  double grados_centro;
   bool centro_, derecha_, izquierda_;
   bool pressed_;
 
