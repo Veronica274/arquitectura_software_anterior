@@ -90,7 +90,7 @@ public:
       }
       break;
     }
-    pub_vel_.publish(cmd);
+    //pub_vel_.publish(cmd);
   }
   void markers()
   {
@@ -180,7 +180,6 @@ private:
   ros::Publisher pub_marker_;
   ros::Publisher pub_marker_array_;
 };
-
 
 int main(int argc, char **argv)
 {
