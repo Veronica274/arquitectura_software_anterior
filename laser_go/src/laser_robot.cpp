@@ -38,7 +38,6 @@ public:
     centro_ = msg->ranges[msg->ranges.size()/2] < MIN_DIST;
     izquierda_ = msg->ranges[(grados_centro - (M_PI/5))/((-1)*msg->angle_increment)] < MIN_DIST;
     derecha_ = msg->ranges[(grados_centro + (M_PI/5))/((-1)*msg->angle_increment)] < MIN_DIST;
-    pressed_ = (centro_ || derecha_ || izquierda_);
     
     ROS_INFO("Data centro: [%i][%f][%ld]",centro_, msg->ranges[msg->ranges.size()/2], msg->ranges.size()/2);
     ROS_INFO("Data derecha: [%i][%f][%f]",derecha_, msg->ranges[(grados_centro + (M_PI/5))/((-1)*msg->angle_increment)], (grados_centro + (M_PI/5))/((-1)*msg->angle_increment));
@@ -52,17 +51,33 @@ public:
 
     switch (state_)
     {
-    case GOING_FORWARD:
-      cmd.linear.x=0.3;
-      cmd.angular.z=0.0;
-      if (pressed_)
-      {
-        press_ts_ = ros::Time::now();
-        state_ = GOING_BACK;
-        ROS_INFO("GOING_FORWARD -> GOING_BACK");
-      }
-      break;
-
+      case GOING_FORWARD:
+        cmd.linear.x=0.3;
+        cmd.angular.z=0.0;
+        if (izquierda_)
+        {
+          press_ts_ = ros::Time::now();
+          state_ = BACK_TURNING_LEFT;
+          ROS_INFO("GOING_FORWARD -> TURNING_LEFT");
+        }
+        else if (derecha_)
+        {
+          press_ts_ = ros::Time::now();
+          state_ = BACK_TURNING_RIGHT;
+          ROS_INFO("GOING_FORWARD -> TURNING_RIGHT");
+        }
+        else if (centro_)
+        {
+          press_ts_ = ros::Time::now();
+          //Aleatorio
+          if()
+            state_ = BACK_TURNING_RIGHT;
+          else()
+            state_ = BACK_TURNING_LEFT;
+          ROS_INFO("GOING_FORWARD -> TURNING_RIGHT");
+        }
+        break;
+    /*
     case GOING_BACK:
 
       cmd.linear.x=-0.3;
@@ -74,18 +89,41 @@ public:
         ROS_INFO("GOING_BACK -> TURNING");
       }
       break;
-
-    case TURNING:
-      cmd.linear.x=0.0;
-      cmd.angular.z=0.3;
-      if ((ros::Time::now()-turn_ts_).toSec() > TURNING_TIME )
-      {
-        state_ = GOING_FORWARD;
-        ROS_INFO("TURNING -> GOING_FORWARD");
-      }
-      break;
+    */
+      case BACK_TURNING_RIGHT:
+        cmd.linear.x=-0.3;
+        cmd.angular.z=0.0;
+        if ((ros::Time::now() - press_ts_).toSec() > BACKING_TIME )
+        {
+          turn_ts_ = ros::Time::now();
+          ROS_INFO("GOING_BACK -> TURNING_RIGHT");
+        }
+        cmd.linear.x=0.0;
+        cmd.angular.z=-0.3;
+        if ((ros::Time::now()-turn_ts_).toSec() > TURNING_TIME )
+        {
+          state_ = GOING_FORWARD;
+          ROS_INFO("TURNING -> GOING_FORWARD");
+        }
+        break;
+      case BACK_TURNING_LEFT:
+        cmd.linear.x=-0.3;
+        cmd.angular.z=0.0;
+        if ((ros::Time::now() - press_ts_).toSec() > BACKING_TIME )
+        {
+          turn_ts_ = ros::Time::now();
+          ROS_INFO("GOING_BACK -> TURNING_LEFT");
+        }
+        cmd.linear.x=0.0;
+        cmd.angular.z=0.3;
+        if ((ros::Time::now()-turn_ts_).toSec() > TURNING_TIME )
+        {
+          state_ = GOING_FORWARD;
+          ROS_INFO("TURNING -> GOING_FORWARD");
+        }
+        break;
     }
-    //pub_vel_.publish(cmd);
+    pub_vel_.publish(cmd);
   }
 
 private:
