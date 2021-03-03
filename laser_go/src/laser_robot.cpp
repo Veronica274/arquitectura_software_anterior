@@ -20,8 +20,9 @@
 #include "visualization_msgs/Marker.h" 
 #include "visualization_msgs/MarkerArray.h" 
 
-#define TURNING_TIME 5.0
-#define BACKING_TIME 3.0
+#include <random>
+#include "cmath"
+
 #define MIN_DIST 0.3
 
 class LaserGo
@@ -45,9 +46,9 @@ public:
     derecha_ = msg->ranges[(grados_centro_ + (M_PI/5))/((-1)*msg->angle_increment)] < MIN_DIST;
     pressed_ = (centro_ || derecha_ || izquierda_);
     
-    ROS_INFO("Data centro: [%i][%f][%ld]",centro_, msg->ranges[msg->ranges.size()/2], msg->ranges.size()/2);
-    ROS_INFO("Data derecha: [%i][%f][%f]",derecha_, msg->ranges[(grados_centro_ + (M_PI/5))/((-1)*msg->angle_increment)], (grados_centro_ + (M_PI/5))/((-1)*msg->angle_increment));
-    ROS_INFO("Data izquierda: [%i][%f][%f]",izquierda_, msg->ranges[(grados_centro_ - (M_PI/5))/((-1)*msg->angle_increment)], (grados_centro_ - (M_PI/5))/((-1)*msg->angle_increment));
+    //ROS_INFO("Data centro: [%i][%f][%ld]",centro_, msg->ranges[msg->ranges.size()/2], msg->ranges.size()/2);
+    //ROS_INFO("Data derecha: [%i][%f][%f]",derecha_, msg->ranges[(grados_centro_ + (M_PI/5))/((-1)*msg->angle_increment)], (grados_centro_ + (M_PI/5))/((-1)*msg->angle_increment));
+    //ROS_INFO("Data izquierda: [%i][%f][%f]",izquierda_, msg->ranges[(grados_centro_ - (M_PI/5))/((-1)*msg->angle_increment)], (grados_centro_ - (M_PI/5))/((-1)*msg->angle_increment));
   }
 
     //Las variables y estructura se modificarán para que funcione con el laser y no con el bumper
@@ -55,9 +56,18 @@ public:
   {
     geometry_msgs::Twist cmd;
 
+    srand( time( NULL ) );
+
+    std::default_random_engine generator(time(0));
+    std::normal_distribution<double> distribution(3.0, 0.5);
+
+    
+    backing_time_ = distribution(generator);
+    turning_time_ = distribution(generator) + backing_time_; // se suma backing_time para que gira el tiempo determinado
+
     switch (state_)
     {
-
+      
       case GOING_FORWARD:
         cmd.linear.x=0.3;
         cmd.angular.z=0.0;
@@ -66,37 +76,44 @@ public:
           izquierda_laser_ = 1;
           press_ts_ = ros::Time::now();
           state_ = BACK_TURNING_LEFT;
-          ROS_INFO("GOING_FORWARD -> TURNING_LEFT");
+          //ROS_INFO("GOING_FORWARD -> TURNING_LEFT");
         }
         else if (derecha_)
         {
           derecha_laser_ = 1;
           press_ts_ = ros::Time::now();
           state_ = BACK_TURNING_RIGHT;
-          ROS_INFO("GOING_FORWARD -> TURNING_RIGHT");
+          //ROS_INFO("GOING_FORWARD -> TURNING_RIGHT");
         }
         else if (centro_)
         {
           centro_laser_ = 1;
           press_ts_ = ros::Time::now();
+          int random = rand() % 2;
           // Esta parte hay que hacerla aleatoria
-          //if()
-            //state_ = BACK_TURNING_RIGHT;
-          //else()
-          state_ = BACK_TURNING_LEFT;
-          ROS_INFO("GOING_FORWARD -> TURNING_RIGHT");
+          //ROS_INFO("0 derecha 1 izquierda %d \n", random);
+          if(random == 0) {
+            state_ = BACK_TURNING_RIGHT;
+            //ROS_INFO("GOING_FORWARD -> TURNING_RIGHT");
+          }
+          else if (random == 1) {
+            state_ = BACK_TURNING_LEFT;
+            //ROS_INFO("GOING_FORWARD -> TURNING_RIGHT");
+          }
+          
+          
         }
         break;
       
       case BACK_TURNING_RIGHT:
-        if ((ros::Time::now() - press_ts_).toSec() < BACKING_TIME )
+        if ((ros::Time::now() - press_ts_).toSec() < backing_time_ )
         {
           cmd.linear.x=-0.3;
           cmd.angular.z=0.0;
         }
-        else if ((ros::Time::now() - press_ts_).toSec() < TURNING_TIME )
+        else if ((ros::Time::now() - press_ts_).toSec() < turning_time_ )
         {
-          ROS_INFO("GOING_BACK -> TURNING_RIGHT");
+          //ROS_INFO("GOING_BACK -> TURNING_RIGHT");
           cmd.linear.x=0.0;
           cmd.angular.z=0.3;
         }
@@ -105,19 +122,22 @@ public:
           centro_laser_ = 0;
           derecha_laser_ = 0;
           state_ = GOING_FORWARD;
-          ROS_INFO("TURNING -> GOING_FORWARD");
+          //ROS_INFO("TURNING -> GOING_FORWARD");
         }
+        //ROS_INFO("Tiempo marcha atras %f \n", backing_time_);
+        //ROS_INFO("Tiempo girar  %f \n", turning_time_);
         break;
 
       case BACK_TURNING_LEFT:
-        if ((ros::Time::now() - press_ts_).toSec() < BACKING_TIME )
+        
+        if ((ros::Time::now() - press_ts_).toSec() < backing_time_ )
         {
           cmd.linear.x=-0.3;
           cmd.angular.z=0.0;
         }
-        else if ((ros::Time::now() - press_ts_).toSec() < TURNING_TIME )
+        else if ((ros::Time::now() - press_ts_).toSec() < turning_time_ )
         {
-          ROS_INFO("GOING_BACK -> TURNING_LEFT");
+          //ROS_INFO("GOING_BACK -> TURNING_LEFT");
           cmd.linear.x=0.0;
           cmd.angular.z=-0.3;
         }
@@ -126,8 +146,10 @@ public:
           centro_laser_ = 0;
           izquierda_laser_ = 0;
           state_ = GOING_FORWARD;
-          ROS_INFO("TURNING -> GOING_FORWARD");
+          //ROS_INFO("TURNING -> GOING_FORWARD");
         }
+        //ROS_INFO("Tiempo marcha atras %f \n", backing_time_);
+        //ROS_INFO("Tiempo girar  %f \n", turning_time_);
         break;
     }
     pub_vel_.publish(cmd);
@@ -220,6 +242,9 @@ private:
   ros::Publisher pub_vel_;
   ros::Publisher pub_marker_;
   ros::Publisher pub_marker_array_;
+
+  double turning_time_; 
+  double backing_time_; 
 };
 
 int main(int argc, char **argv)
