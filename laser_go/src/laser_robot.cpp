@@ -57,6 +57,7 @@ public:
 
     switch (state_)
     {
+
       case GOING_FORWARD:
         cmd.linear.x=0.3;
         cmd.angular.z=0.0;
@@ -195,6 +196,72 @@ public:
     msg_array.markers[0] = marker_centro;
     msg_array.markers[1] = marker_izq;
     msg_array.markers[2] = marker_derecha;
+    pub_marker_array_.publish(msg_array);
+  }
+  void markers()
+  {
+    visualization_msgs::Marker marker_centro;
+
+    marker_centro.header.frame_id = "base_link";
+    marker_centro.header.stamp = ros::Time();
+    marker_centro.ns = "my_namespace";
+    marker_centro.id = 0;
+    marker_centro.type = visualization_msgs::Marker::SPHERE;
+    marker_centro.action = visualization_msgs::Marker::ADD;
+    marker_centro.pose.position.x = 1;
+    marker_centro.pose.position.y = 0;
+    marker_centro.pose.position.z = 0;
+    marker_centro.pose.orientation.x = 0.0;
+    marker_centro.pose.orientation.y = 0.0;
+    marker_centro.pose.orientation.z = 0.0;
+    marker_centro.pose.orientation.w = 1.0;
+    marker_centro.scale.x = 0.25;
+    marker_centro.scale.y = 0.25;
+    marker_centro.scale.z = 0.25;
+    marker_centro.color.a = 1.0; 
+    marker_centro.color.r = 0.0;
+    marker_centro.color.g = 1.0;
+    marker_centro.color.b = 0.0;
+    marker_centro.lifetime = ros::Duration(1.0);
+
+    visualization_msgs::MarkerArray msg_array;
+    msg_array.markers.resize(3);
+    msg_array.markers[0] = marker_centro;
+
+    visualization_msgs::Marker marker_izq;
+
+    marker_izq = marker_centro;
+    marker_izq.header.frame_id = "base_link";
+    marker_izq.id = 1;
+    marker_izq.pose.position.x = cos(M_PI/5);
+    marker_izq.pose.position.y = sin(M_PI/5);
+    msg_array.markers[1] = marker_izq;
+
+    visualization_msgs::Marker marker_derecha;
+    marker_derecha = marker_centro;
+    marker_derecha.header.frame_id = "base_link";
+    marker_derecha.id = 2;
+    marker_derecha.pose.position.x = (cos(M_PI/5));
+    marker_derecha.pose.position.y = sin(M_PI/5)*(-1);
+   
+    msg_array.markers[2] = marker_derecha;
+
+    if(centro_)
+    {
+      marker_centro.color.g = 0.0;
+      marker_centro.color.r = 1.0;
+    }
+    else if(derecha_)
+    {
+      marker_derecha.color.g = 0.0;
+      marker_derecha.color.r = 1.0;
+    }
+    else if(izquierda_)
+    {
+      marker_izq.color.g = 0.0;
+      marker_izq.color.r = 1.0;
+    }
+
     pub_marker_array_.publish(msg_array);
   }
 
