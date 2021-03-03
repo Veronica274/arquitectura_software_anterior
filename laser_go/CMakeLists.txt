@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   roslint
   kobuki_msgs
   sensor_msgs
+  visualization_msgs
 )
 
 catkin_package(
