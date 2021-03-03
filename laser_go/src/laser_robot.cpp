@@ -22,7 +22,7 @@
 
 #define TURNING_TIME 5.0
 #define BACKING_TIME 3.0
-#define MIN_DIST 0.3;
+#define MIN_DIST 0.3
 
 class LaserGo
 {
@@ -38,15 +38,16 @@ public:
   void laserCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
   {
     //En esta variable almacenaremos los grados del centro para que nos sea mas fácil operar con ángulos
-    grados_centro = msg->ranges.size()/2 * msg->angle_increment * (-1);
+    //Como el incremento del ángulo es negativo, lo haremos positivo para que las operaciones nos den bien.
+    grados_centro_ = msg->ranges.size()/2 * msg->angle_increment * (-1);
     centro_ = msg->ranges[msg->ranges.size()/2] < MIN_DIST;
-    izquierda_ = msg->ranges[(grados_centro - (M_PI/5))/((-1)*msg->angle_increment)] < MIN_DIST;
-    derecha_ = msg->ranges[(grados_centro + (M_PI/5))/((-1)*msg->angle_increment)] < MIN_DIST;
+    izquierda_ = msg->ranges[(grados_centro_ - (M_PI/5))/((-1)*msg->angle_increment)] < MIN_DIST;
+    derecha_ = msg->ranges[(grados_centro_ + (M_PI/5))/((-1)*msg->angle_increment)] < MIN_DIST;
     pressed_ = (centro_ || derecha_ || izquierda_);
     
     ROS_INFO("Data centro: [%i][%f][%ld]",centro_, msg->ranges[msg->ranges.size()/2], msg->ranges.size()/2);
-    ROS_INFO("Data derecha: [%i][%f][%f]",derecha_, msg->ranges[(grados_centro + (M_PI/5))/((-1)*msg->angle_increment)], (grados_centro + (M_PI/5))/((-1)*msg->angle_increment));
-    ROS_INFO("Data izquierda: [%i][%f][%f]",izquierda_, msg->ranges[(grados_centro - (M_PI/5))/((-1)*msg->angle_increment)], (grados_centro - (M_PI/5))/((-1)*msg->angle_increment));
+    ROS_INFO("Data derecha: [%i][%f][%f]",derecha_, msg->ranges[(grados_centro_ + (M_PI/5))/((-1)*msg->angle_increment)], (grados_centro_ + (M_PI/5))/((-1)*msg->angle_increment));
+    ROS_INFO("Data izquierda: [%i][%f][%f]",izquierda_, msg->ranges[(grados_centro_ - (M_PI/5))/((-1)*msg->angle_increment)], (grados_centro_ - (M_PI/5))/((-1)*msg->angle_increment));
   }
 
     //Las variables y estructura se modificarán para que funcione con el laser y no con el bumper
@@ -56,41 +57,146 @@ public:
 
     switch (state_)
     {
-    case GOING_FORWARD:
-      cmd.linear.x=0.3;
-      cmd.angular.z=0.0;
 
-      if (pressed_)
-      {
-        press_ts_ = ros::Time::now();
-        state_ = GOING_BACK;
-        ROS_INFO("GOING_FORWARD -> GOING_BACK");
-      }
-      break;
+      case GOING_FORWARD:
+        cmd.linear.x=0.3;
+        cmd.angular.z=0.0;
+        if (izquierda_)
+        {
+          izquierda_laser_ = 1;
+          press_ts_ = ros::Time::now();
+          state_ = BACK_TURNING_LEFT;
+          ROS_INFO("GOING_FORWARD -> TURNING_LEFT");
+        }
+        else if (derecha_)
+        {
+          derecha_laser_ = 1;
+          press_ts_ = ros::Time::now();
+          state_ = BACK_TURNING_RIGHT;
+          ROS_INFO("GOING_FORWARD -> TURNING_RIGHT");
+        }
+        else if (centro_)
+        {
+          centro_laser_ = 1;
+          press_ts_ = ros::Time::now();
+          // Esta parte hay que hacerla aleatoria
+          //if()
+            //state_ = BACK_TURNING_RIGHT;
+          //else()
+          state_ = BACK_TURNING_LEFT;
+          ROS_INFO("GOING_FORWARD -> TURNING_RIGHT");
+        }
+        break;
+      
+      case BACK_TURNING_RIGHT:
+        if ((ros::Time::now() - press_ts_).toSec() < BACKING_TIME )
+        {
+          cmd.linear.x=-0.3;
+          cmd.angular.z=0.0;
+        }
+        else if ((ros::Time::now() - press_ts_).toSec() < TURNING_TIME )
+        {
+          ROS_INFO("GOING_BACK -> TURNING_RIGHT");
+          cmd.linear.x=0.0;
+          cmd.angular.z=0.3;
+        }
+        else
+        {
+          centro_laser_ = 0;
+          derecha_laser_ = 0;
+          state_ = GOING_FORWARD;
+          ROS_INFO("TURNING -> GOING_FORWARD");
+        }
+        break;
 
-    case GOING_BACK:
-
-      cmd.linear.x=-0.3;
-      cmd.angular.z=0.0;
-      if ((ros::Time::now() - press_ts_).toSec() > BACKING_TIME )
-      {
-        turn_ts_ = ros::Time::now();
-        state_ = TURNING;
-        ROS_INFO("GOING_BACK -> TURNING");
-      }
-      break;
-
-    case TURNING:
-      cmd.linear.x=0.0;
-      cmd.angular.z=0.3;
-      if ((ros::Time::now()-turn_ts_).toSec() > TURNING_TIME )
-      {
-        state_ = GOING_FORWARD;
-        ROS_INFO("TURNING -> GOING_FORWARD");
-      }
-      break;
+      case BACK_TURNING_LEFT:
+        if ((ros::Time::now() - press_ts_).toSec() < BACKING_TIME )
+        {
+          cmd.linear.x=-0.3;
+          cmd.angular.z=0.0;
+        }
+        else if ((ros::Time::now() - press_ts_).toSec() < TURNING_TIME )
+        {
+          ROS_INFO("GOING_BACK -> TURNING_LEFT");
+          cmd.linear.x=0.0;
+          cmd.angular.z=-0.3;
+        }
+        else
+        {
+          centro_laser_ = 0;
+          izquierda_laser_ = 0;
+          state_ = GOING_FORWARD;
+          ROS_INFO("TURNING -> GOING_FORWARD");
+        }
+        break;
     }
-    //pub_vel_.publish(cmd);
+    pub_vel_.publish(cmd);
+  }
+
+  void markers()
+  {
+    visualization_msgs::Marker marker_centro;
+
+    marker_centro.header.frame_id = "base_link";
+    marker_centro.header.stamp = ros::Time();
+    marker_centro.ns = "my_namespace";
+    marker_centro.id = 0;
+    marker_centro.type = visualization_msgs::Marker::SPHERE;
+    marker_centro.action = visualization_msgs::Marker::ADD;
+    marker_centro.pose.position.x = MIN_DIST;
+    marker_centro.pose.position.y = 0;
+    marker_centro.pose.position.z = 0;
+    marker_centro.pose.orientation.x = 0.0;
+    marker_centro.pose.orientation.y = 0.0;
+    marker_centro.pose.orientation.z = 0.0;
+    marker_centro.pose.orientation.w = 1.0;
+    marker_centro.scale.x = MIN_DIST / 2;
+    marker_centro.scale.y = MIN_DIST / 2;
+    marker_centro.scale.z = MIN_DIST / 2;
+    marker_centro.color.a = 1.0; 
+    marker_centro.color.r = 0.0;
+    marker_centro.color.g = 1.0;
+    marker_centro.color.b = 0.0;
+    marker_centro.lifetime = ros::Duration(1.0);
+
+    visualization_msgs::MarkerArray msg_array;
+    msg_array.markers.resize(3);
+
+    visualization_msgs::Marker marker_izq;
+
+    marker_izq = marker_centro;
+    marker_izq.header.frame_id = "base_link";
+    marker_izq.id = 1;
+    marker_izq.pose.position.x = cos(M_PI/5) * MIN_DIST;
+    marker_izq.pose.position.y = sin(M_PI/5) * MIN_DIST;
+
+    visualization_msgs::Marker marker_derecha;
+    marker_derecha = marker_centro;
+    marker_derecha.header.frame_id = "base_link";
+    marker_derecha.id = 2;
+    marker_derecha.pose.position.x = (cos(M_PI/5)) * 0.3;
+    marker_derecha.pose.position.y = sin(M_PI/5)*(-1) * 0.3;
+   
+    if(centro_laser_)
+    {
+      marker_centro.color.g = 0.0;
+      marker_centro.color.r = 1.0;
+    }
+    else if(derecha_laser_)
+    {
+      marker_derecha.color.g = 0.0;
+      marker_derecha.color.r = 1.0;
+    }
+    else if(izquierda_laser_)
+    {
+      marker_izq.color.g = 0.0;
+      marker_izq.color.r = 1.0;
+    }
+
+    msg_array.markers[0] = marker_centro;
+    msg_array.markers[1] = marker_izq;
+    msg_array.markers[2] = marker_derecha;
+    pub_marker_array_.publish(msg_array);
   }
   void markers()
   {
@@ -163,13 +269,14 @@ private:
   ros::NodeHandle n_;
 
   static const int GOING_FORWARD = 0;
-  static const int GOING_BACK = 1;
-  static const int TURNING = 2;
+  static const int BACK_TURNING_LEFT = 1;
+  static const int BACK_TURNING_RIGHT = 2;
 
   int state_;
 
-  double grados_centro;
+  double grados_centro_;
   bool centro_, derecha_, izquierda_;
+  bool centro_laser_, derecha_laser_, izquierda_laser_;
   bool pressed_;
 
   ros::Time press_ts_;
