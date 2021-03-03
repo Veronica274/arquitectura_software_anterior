@@ -62,8 +62,8 @@ public:
     std::normal_distribution<double> distribution(3.0, 0.5);
 
     
-    BACKING_TIME_ = distribution(generator);
-    TURNING_TIME_ = distribution(generator) + BACKING_TIME_; // se suma backing_time para que gira el tiempo determinado
+    backing_time_ = distribution(generator);
+    turning_time_ = distribution(generator) + backing_time_; // se suma backing_time para que gira el tiempo determinado
 
     switch (state_)
     {
@@ -106,12 +106,12 @@ public:
         break;
       
       case BACK_TURNING_RIGHT:
-        if ((ros::Time::now() - press_ts_).toSec() < BACKING_TIME_ )
+        if ((ros::Time::now() - press_ts_).toSec() < backing_time_ )
         {
           cmd.linear.x=-0.3;
           cmd.angular.z=0.0;
         }
-        else if ((ros::Time::now() - press_ts_).toSec() < TURNING_TIME_ )
+        else if ((ros::Time::now() - press_ts_).toSec() < turning_time_ )
         {
           //ROS_INFO("GOING_BACK -> TURNING_RIGHT");
           cmd.linear.x=0.0;
@@ -124,18 +124,18 @@ public:
           state_ = GOING_FORWARD;
           //ROS_INFO("TURNING -> GOING_FORWARD");
         }
-        //ROS_INFO("Tiempo marcha atras %f \n", BACKING_TIME_);
-        //ROS_INFO("Tiempo girar  %f \n", TURNING_TIME_);
+        //ROS_INFO("Tiempo marcha atras %f \n", backing_time_);
+        //ROS_INFO("Tiempo girar  %f \n", turning_time_);
         break;
 
       case BACK_TURNING_LEFT:
         
-        if ((ros::Time::now() - press_ts_).toSec() < BACKING_TIME_ )
+        if ((ros::Time::now() - press_ts_).toSec() < backing_time_ )
         {
           cmd.linear.x=-0.3;
           cmd.angular.z=0.0;
         }
-        else if ((ros::Time::now() - press_ts_).toSec() < TURNING_TIME_ )
+        else if ((ros::Time::now() - press_ts_).toSec() < turning_time_ )
         {
           //ROS_INFO("GOING_BACK -> TURNING_LEFT");
           cmd.linear.x=0.0;
@@ -148,8 +148,8 @@ public:
           state_ = GOING_FORWARD;
           //ROS_INFO("TURNING -> GOING_FORWARD");
         }
-        //ROS_INFO("Tiempo marcha atras %f \n", BACKING_TIME_);
-        //ROS_INFO("Tiempo girar  %f \n", TURNING_TIME_);
+        //ROS_INFO("Tiempo marcha atras %f \n", backing_time_);
+        //ROS_INFO("Tiempo girar  %f \n", turning_time_);
         break;
     }
     pub_vel_.publish(cmd);
@@ -243,8 +243,8 @@ private:
   ros::Publisher pub_marker_;
   ros::Publisher pub_marker_array_;
 
-  double TURNING_TIME_; 
-  double BACKING_TIME_; 
+  double turning_time_; 
+  double backing_time_; 
 };
 
 int main(int argc, char **argv)
