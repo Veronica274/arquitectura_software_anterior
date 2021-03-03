@@ -17,6 +17,8 @@
 
 #include "geometry_msgs/Twist.h"
 #include "sensor_msgs/LaserScan.h" 
+#include "visualization_msgs/Marker.h" 
+#include "visualization_msgs/MarkerArray.h" 
 
 #define TURNING_TIME 5.0
 #define BACKING_TIME 3.0
@@ -29,6 +31,8 @@ public:
   {
     sub_laser_ = n_.subscribe("/scan", 1, &LaserGo::laserCallback, this);
     pub_vel_ = n_.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 1);
+    pub_marker_ = n_.advertise<visualization_msgs::Marker>("/visualization_markers", 1);
+    pub_marker_array_ = n_.advertise<visualization_msgs::MarkerArray>("/visualization_markers_array", 1);
   }
 
   void laserCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
@@ -55,6 +59,7 @@ public:
     case GOING_FORWARD:
       cmd.linear.x=0.3;
       cmd.angular.z=0.0;
+
       if (pressed_)
       {
         press_ts_ = ros::Time::now();
@@ -87,6 +92,72 @@ public:
     }
     //pub_vel_.publish(cmd);
   }
+  void markers()
+  {
+    visualization_msgs::Marker marker_centro;
+
+    marker_centro.header.frame_id = "base_link";
+    marker_centro.header.stamp = ros::Time();
+    marker_centro.ns = "my_namespace";
+    marker_centro.id = 0;
+    marker_centro.type = visualization_msgs::Marker::SPHERE;
+    marker_centro.action = visualization_msgs::Marker::ADD;
+    marker_centro.pose.position.x = 1;
+    marker_centro.pose.position.y = 0;
+    marker_centro.pose.position.z = 0;
+    marker_centro.pose.orientation.x = 0.0;
+    marker_centro.pose.orientation.y = 0.0;
+    marker_centro.pose.orientation.z = 0.0;
+    marker_centro.pose.orientation.w = 1.0;
+    marker_centro.scale.x = 0.25;
+    marker_centro.scale.y = 0.25;
+    marker_centro.scale.z = 0.25;
+    marker_centro.color.a = 1.0; 
+    marker_centro.color.r = 0.0;
+    marker_centro.color.g = 1.0;
+    marker_centro.color.b = 0.0;
+    marker_centro.lifetime = ros::Duration(1.0);
+
+    visualization_msgs::MarkerArray msg_array;
+    msg_array.markers.resize(3);
+    msg_array.markers[0] = marker_centro;
+
+    visualization_msgs::Marker marker_izq;
+
+    marker_izq = marker_centro;
+    marker_izq.header.frame_id = "base_link";
+    marker_izq.id = 1;
+    marker_izq.pose.position.x = cos(M_PI/5);
+    marker_izq.pose.position.y = sin(M_PI/5);
+    msg_array.markers[1] = marker_izq;
+
+    visualization_msgs::Marker marker_derecha;
+    marker_derecha = marker_centro;
+    marker_derecha.header.frame_id = "base_link";
+    marker_derecha.id = 2;
+    marker_derecha.pose.position.x = (cos(M_PI/5));
+    marker_derecha.pose.position.y = sin(M_PI/5)*(-1);
+   
+    msg_array.markers[2] = marker_derecha;
+
+    if(centro_)
+    {
+      marker_centro.color.g = 0.0;
+      marker_centro.color.r = 1.0;
+    }
+    else if(derecha_)
+    {
+      marker_derecha.color.g = 0.0;
+      marker_derecha.color.r = 1.0;
+    }
+    else if(izquierda_)
+    {
+      marker_izq.color.g = 0.0;
+      marker_izq.color.r = 1.0;
+    }
+
+    pub_marker_array_.publish(msg_array);
+  }
 
 private:
   ros::NodeHandle n_;
@@ -106,8 +177,9 @@ private:
 
   ros::Subscriber sub_laser_;
   ros::Publisher pub_vel_;
+  ros::Publisher pub_marker_;
+  ros::Publisher pub_marker_array_;
 };
-
 
 int main(int argc, char **argv)
 {
@@ -120,6 +192,7 @@ int main(int argc, char **argv)
   while (ros::ok())
   {
     lasergo.step();
+    lasergo.markers();
 
     ros::spinOnce();
     loop_rate.sleep();
