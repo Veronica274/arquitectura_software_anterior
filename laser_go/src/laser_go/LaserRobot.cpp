@@ -16,9 +16,9 @@
 
 
 #include "geometry_msgs/Twist.h"
-#include "sensor_msgs/LaserScan.h" 
-#include "visualization_msgs/Marker.h" 
-#include "visualization_msgs/MarkerArray.h" 
+#include "sensor_msgs/LaserScan.h"
+#include "visualization_msgs/Marker.h"
+#include "visualization_msgs/MarkerArray.h"
 
 #include <random>
 #include "cmath"
@@ -42,8 +42,8 @@ LaserRobot::LaserRobot()
 
 void LaserRobot::laserCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
-    //En esta variable almacenaremos los grados del centro para que nos sea mas fácil operar con ángulos
-    //Como el incremento del ángulo es negativo, lo haremos positivo para que las operaciones nos den bien.
+    // En esta variable almacenaremos los grados del centro para que nos sea mas fácil operar con ángulos
+    // Como el incremento del ángulo es negativo, lo haremos positivo para que las operaciones nos den bien.
     grados_centro_ = msg->ranges.size()/2 * msg->angle_increment * (-1);
     centro_ = msg->ranges[msg->ranges.size()/2] < MIN_DIST;
     izquierda_ = msg->ranges[(grados_centro_ - (M_PI/5))/((-1)*msg->angle_increment)] < MIN_DIST;

@@ -15,9 +15,9 @@
 #include "ros/ros.h"
 
 #include "geometry_msgs/Twist.h"
-#include "sensor_msgs/LaserScan.h" 
-#include "visualization_msgs/Marker.h" 
-#include "visualization_msgs/MarkerArray.h" 
+#include "sensor_msgs/LaserScan.h"
+#include "visualization_msgs/Marker.h"
+#include "visualization_msgs/MarkerArray.h"
 
 #include <random>
 #include "cmath"
