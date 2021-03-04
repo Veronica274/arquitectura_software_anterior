@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "ros/ros.h"
+#ifndef LASER_GO_LASERROBOT_H
+#define LASER_GO_LASERROBOT_H
 
+#include "ros/ros.h"
 
 #include "geometry_msgs/Twist.h"
 #include "sensor_msgs/LaserScan.h" 
@@ -22,8 +24,6 @@
 
 #include <random>
 #include "cmath"
-
-#include "laser_go/LaserRobot.h"
 
 namespace laser_go
 {
