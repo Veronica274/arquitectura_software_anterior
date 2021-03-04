@@ -34,7 +34,7 @@ namespace laser_go
 LaserRobot::LaserRobot()
 {
     state_ = GOING_FORWARD;
-    sub_laser_ = n_.subscribe("/scan", 1, &LaserGo::laserCallback, this);
+    sub_laser_ = n_.subscribe("/scan", 1, &LaserRobot::laserCallback, this);
     pub_vel_ = n_.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 1);
     pub_marker_ = n_.advertise<visualization_msgs::Marker>("/visualization_markers", 1);
     pub_marker_array_ = n_.advertise<visualization_msgs::MarkerArray>("/visualization_markers_array", 1);
