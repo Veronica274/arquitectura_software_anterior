@@ -23,44 +23,41 @@
 #include <random>
 #include "cmath"
 
-#define MIN_DIST 0.3
+#include "laser_go/LaserRobot.h"
 
-class LaserGo
+#define MIN_DIST 0.3
+#define VARIANCE 0.5
+#define MEAN 0.3
+
+namespace laser_go
 {
-public:
-  LaserGo()
-  {
+LaserRobot::LaserRobot()
+{
     state_ = GOING_FORWARD;
     sub_laser_ = n_.subscribe("/scan", 1, &LaserGo::laserCallback, this);
     pub_vel_ = n_.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 1);
     pub_marker_ = n_.advertise<visualization_msgs::Marker>("/visualization_markers", 1);
     pub_marker_array_ = n_.advertise<visualization_msgs::MarkerArray>("/visualization_markers_array", 1);
-  }
+}
 
-  void laserCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
-  {
+void LaserRobot::laserCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
+{
     //En esta variable almacenaremos los grados del centro para que nos sea mas fácil operar con ángulos
     //Como el incremento del ángulo es negativo, lo haremos positivo para que las operaciones nos den bien.
     grados_centro_ = msg->ranges.size()/2 * msg->angle_increment * (-1);
     centro_ = msg->ranges[msg->ranges.size()/2] < MIN_DIST;
     izquierda_ = msg->ranges[(grados_centro_ - (M_PI/5))/((-1)*msg->angle_increment)] < MIN_DIST;
     derecha_ = msg->ranges[(grados_centro_ + (M_PI/5))/((-1)*msg->angle_increment)] < MIN_DIST;
-    pressed_ = (centro_ || derecha_ || izquierda_);
-    
-    //ROS_INFO("Data centro: [%i][%f][%ld]",centro_, msg->ranges[msg->ranges.size()/2], msg->ranges.size()/2);
-    //ROS_INFO("Data derecha: [%i][%f][%f]",derecha_, msg->ranges[(grados_centro_ + (M_PI/5))/((-1)*msg->angle_increment)], (grados_centro_ + (M_PI/5))/((-1)*msg->angle_increment));
-    //ROS_INFO("Data izquierda: [%i][%f][%f]",izquierda_, msg->ranges[(grados_centro_ - (M_PI/5))/((-1)*msg->angle_increment)], (grados_centro_ - (M_PI/5))/((-1)*msg->angle_increment));
-  }
+}
 
-    //Las variables y estructura se modificarán para que funcione con el laser y no con el bumper
-  void step()
-  {
+void LaserRobot::step()
+{
     geometry_msgs::Twist cmd;
 
     srand( time( NULL ) );
 
     std::default_random_engine generator(time(0));
-    std::normal_distribution<double> distribution(3.0, 0.5);
+    std::normal_distribution<double> distribution(MEAN, VARIANCE);
 
     
     backing_time_ = distribution(generator);
@@ -77,29 +74,23 @@ public:
           izquierda_laser_ = 1;
           press_ts_ = ros::Time::now();
           state_ = BACK_TURNING_LEFT;
-          //ROS_INFO("GOING_FORWARD -> TURNING_LEFT");
         }
         else if (derecha_)
         {
           derecha_laser_ = 1;
           press_ts_ = ros::Time::now();
           state_ = BACK_TURNING_RIGHT;
-          //ROS_INFO("GOING_FORWARD -> TURNING_RIGHT");
         }
         else if (centro_)
         {
           centro_laser_ = 1;
           press_ts_ = ros::Time::now();
           int random = rand() % 2;
-          // Esta parte hay que hacerla aleatoria
-          //ROS_INFO("0 derecha 1 izquierda %d \n", random);
           if(random == 0) {
             state_ = BACK_TURNING_RIGHT;
-            //ROS_INFO("GOING_FORWARD -> TURNING_RIGHT");
           }
           else if (random == 1) {
             state_ = BACK_TURNING_LEFT;
-            //ROS_INFO("GOING_FORWARD -> TURNING_RIGHT");
           }
           
           
@@ -114,7 +105,6 @@ public:
         }
         else if ((ros::Time::now() - press_ts_).toSec() < turning_time_ )
         {
-          //ROS_INFO("GOING_BACK -> TURNING_RIGHT");
           cmd.linear.x=0.0;
           cmd.angular.z=0.3;
         }
@@ -123,10 +113,7 @@ public:
           centro_laser_ = 0;
           derecha_laser_ = 0;
           state_ = GOING_FORWARD;
-          //ROS_INFO("TURNING -> GOING_FORWARD");
         }
-        //ROS_INFO("Tiempo marcha atras %f \n", backing_time_);
-        //ROS_INFO("Tiempo girar  %f \n", turning_time_);
         break;
 
       case BACK_TURNING_LEFT:
@@ -138,7 +125,6 @@ public:
         }
         else if ((ros::Time::now() - press_ts_).toSec() < turning_time_ )
         {
-          //ROS_INFO("GOING_BACK -> TURNING_LEFT");
           cmd.linear.x=0.0;
           cmd.angular.z=-0.3;
         }
@@ -147,16 +133,13 @@ public:
           centro_laser_ = 0;
           izquierda_laser_ = 0;
           state_ = GOING_FORWARD;
-          //ROS_INFO("TURNING -> GOING_FORWARD");
         }
-        //ROS_INFO("Tiempo marcha atras %f \n", backing_time_);
-        //ROS_INFO("Tiempo girar  %f \n", turning_time_);
         break;
     }
     pub_vel_.publish(cmd);
-  }
+}
 
-  void markers()
+void LaserRobot::markers()
   {
     visualization_msgs::Marker marker_centro;
 
@@ -222,48 +205,4 @@ public:
     pub_marker_array_.publish(msg_array);
   }
 
-private:
-  ros::NodeHandle n_;
-
-  static const int GOING_FORWARD = 0;
-  static const int BACK_TURNING_LEFT = 1;
-  static const int BACK_TURNING_RIGHT = 2;
-
-  int state_;
-
-  double grados_centro_;
-  bool centro_, derecha_, izquierda_;
-  bool centro_laser_, derecha_laser_, izquierda_laser_;
-  bool pressed_;
-
-  ros::Time press_ts_;
-  ros::Time turn_ts_;
-
-  ros::Subscriber sub_laser_;
-  ros::Publisher pub_vel_;
-  ros::Publisher pub_marker_;
-  ros::Publisher pub_marker_array_;
-
-  double turning_time_; 
-  double backing_time_; 
-};
-
-int main(int argc, char **argv)
-{
-  ros::init(argc, argv, "lasergo");
-
-  LaserGo lasergo;
-
-  ros::Rate loop_rate(20);
-
-  while (ros::ok())
-  {
-    lasergo.step();
-    lasergo.markers();
-
-    ros::spinOnce();
-    loop_rate.sleep();
-  }
-
-  return 0;
-}
+} 
