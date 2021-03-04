@@ -25,7 +25,7 @@
 
 #include "laser_go/LaserRobot.h"
 
-#define MIN_DIST 0.3
+#define MIN_DIST 0.8
 #define VARIANCE 0.2
 #define MEAN 1
 
