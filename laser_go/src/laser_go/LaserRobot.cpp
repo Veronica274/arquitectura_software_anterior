@@ -26,8 +26,8 @@
 #include "laser_go/LaserRobot.h"
 
 #define MIN_DIST 0.3
-#define VARIANCE 0.5
-#define MEAN 0.3
+#define VARIANCE 0.2
+#define MEAN 1
 
 namespace laser_go
 {
@@ -71,18 +71,21 @@ void LaserRobot::step()
         cmd.angular.z=0.0;
         if (izquierda_)
         {
+          cmd.linear.x=0.0;
           izquierda_laser_ = 1;
           press_ts_ = ros::Time::now();
           state_ = BACK_TURNING_LEFT;
         }
         else if (derecha_)
         {
+          cmd.linear.x=0.0;
           derecha_laser_ = 1;
           press_ts_ = ros::Time::now();
           state_ = BACK_TURNING_RIGHT;
         }
         else if (centro_)
         {
+          cmd.linear.x=0.0;
           centro_laser_ = 1;
           press_ts_ = ros::Time::now();
           int random = rand() % 2;
@@ -180,8 +183,8 @@ void LaserRobot::markers()
     marker_derecha = marker_centro;
     marker_derecha.header.frame_id = "base_link";
     marker_derecha.id = 2;
-    marker_derecha.pose.position.x = (cos(M_PI/5)) * 0.3;
-    marker_derecha.pose.position.y = sin(M_PI/5)*(-1) * 0.3;
+    marker_derecha.pose.position.x = (cos(M_PI/5)) * MIN_DIST;
+    marker_derecha.pose.position.y = sin(M_PI/5)*(-1) * MIN_DIST;
    
     if(centro_laser_)
     {
