@@ -38,4 +38,5 @@ target_link_libraries(laser_robot_executable ${catkin_LIBRARIES})
 roslint_cpp(
  src/laser_robot.cpp
  src/laser_robot_executable.cpp
+ src/laser_go/LaserRobot.cpp include/laser_go/LaserRobot.h
 )

@@ -16,16 +16,16 @@
 
 
 #include "geometry_msgs/Twist.h"
-#include "sensor_msgs/LaserScan.h" 
-#include "visualization_msgs/Marker.h" 
-#include "visualization_msgs/MarkerArray.h" 
+#include "sensor_msgs/LaserScan.h"
+#include "visualization_msgs/Marker.h"
+#include "visualization_msgs/MarkerArray.h"
 
 #include <random>
 #include "cmath"
 
 #include "laser_go/LaserRobot.h"
 
-#define MIN_DIST 0.3
+#define MIN_DIST 0.4
 #define VARIANCE 0.2
 #define MEAN 1
 
@@ -42,8 +42,8 @@ LaserRobot::LaserRobot()
 
 void LaserRobot::laserCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
-    //En esta variable almacenaremos los grados del centro para que nos sea mas fácil operar con ángulos
-    //Como el incremento del ángulo es negativo, lo haremos positivo para que las operaciones nos den bien.
+    // En esta variable almacenaremos los grados del centro para que nos sea mas fácil operar con ángulos
+    // Como el incremento del ángulo es negativo, lo haremos positivo para que las operaciones nos den bien.
     grados_centro_ = msg->ranges.size()/2 * msg->angle_increment * (-1);
     centro_ = msg->ranges[msg->ranges.size()/2] < MIN_DIST;
     izquierda_ = msg->ranges[(grados_centro_ - (M_PI/5))/((-1)*msg->angle_increment)] < MIN_DIST;
@@ -54,62 +54,61 @@ void LaserRobot::step()
 {
     geometry_msgs::Twist cmd;
 
-    srand( time( NULL ) );
+    srand(time(NULL));
 
     std::default_random_engine generator(time(0));
     std::normal_distribution<double> distribution(MEAN, VARIANCE);
 
-    
     backing_time_ = distribution(generator);
-    turning_time_ = distribution(generator) + backing_time_; // se suma backing_time para que gira el tiempo determinado
+    // Se suma backing_time para que gira el tiempo determinado
+    turning_time_ = distribution(generator) + backing_time_;
 
     switch (state_)
     {
-      
       case GOING_FORWARD:
-        cmd.linear.x=0.3;
-        cmd.angular.z=0.0;
+        cmd.linear.x = 0.3;
+        cmd.angular.z = 0.0;
         if (izquierda_)
         {
-          cmd.linear.x=0.0;
+          cmd.linear.x = 0.0;
           izquierda_laser_ = 1;
           press_ts_ = ros::Time::now();
           state_ = BACK_TURNING_LEFT;
         }
         else if (derecha_)
         {
-          cmd.linear.x=0.0;
+          cmd.linear.x = 0.0;
           derecha_laser_ = 1;
           press_ts_ = ros::Time::now();
           state_ = BACK_TURNING_RIGHT;
         }
         else if (centro_)
         {
-          cmd.linear.x=0.0;
+          cmd.linear.x = 0.0;
           centro_laser_ = 1;
           press_ts_ = ros::Time::now();
           int random = rand() % 2;
-          if(random == 0) {
+          if (random == 0)
+          {
             state_ = BACK_TURNING_RIGHT;
           }
-          else if (random == 1) {
+          else if (random == 1)
+          {
             state_ = BACK_TURNING_LEFT;
           }
-          
-          
         }
         break;
-      
+
       case BACK_TURNING_RIGHT:
         if ((ros::Time::now() - press_ts_).toSec() < backing_time_ )
         {
-          cmd.linear.x=-0.3;
-          cmd.angular.z=0.0;
+          cmd.linear.x = -0.3;
+          cmd.angular.z = 0.0;
         }
         else if ((ros::Time::now() - press_ts_).toSec() < turning_time_ )
         {
-          cmd.linear.x=0.0;
-          cmd.angular.z=0.3;
+          cmd.linear.x = 0.0;
+          cmd.angular.z = 0.3;
         }
         else
         {
@@ -120,16 +119,15 @@ void LaserRobot::step()
         break;
 
       case BACK_TURNING_LEFT:
-        
         if ((ros::Time::now() - press_ts_).toSec() < backing_time_ )
         {
-          cmd.linear.x=-0.3;
-          cmd.angular.z=0.0;
+          cmd.linear.x = -0.3;
+          cmd.angular.z = 0.0;
         }
         else if ((ros::Time::now() - press_ts_).toSec() < turning_time_ )
         {
-          cmd.linear.x=0.0;
-          cmd.angular.z=-0.3;
+          cmd.linear.x = 0.0;
+          cmd.angular.z = -0.3;
         }
         else
         {
@@ -143,7 +141,7 @@ void LaserRobot::step()
 }
 
 void LaserRobot::markers()
-  {
+{
     visualization_msgs::Marker marker_centro;
 
     marker_centro.header.frame_id = "base_link";
@@ -162,7 +160,7 @@ void LaserRobot::markers()
     marker_centro.scale.x = MIN_DIST / 2;
     marker_centro.scale.y = MIN_DIST / 2;
     marker_centro.scale.z = MIN_DIST / 2;
-    marker_centro.color.a = 1.0; 
+    marker_centro.color.a = 1.0;
     marker_centro.color.r = 0.0;
     marker_centro.color.g = 1.0;
     marker_centro.color.b = 0.0;
@@ -185,18 +183,17 @@ void LaserRobot::markers()
     marker_derecha.id = 2;
     marker_derecha.pose.position.x = (cos(M_PI/5)) * MIN_DIST;
     marker_derecha.pose.position.y = sin(M_PI/5)*(-1) * MIN_DIST;
-   
-    if(centro_laser_)
+    if (centro_laser_)
     {
       marker_centro.color.g = 0.0;
       marker_centro.color.r = 1.0;
     }
-    else if(derecha_laser_)
+    else if (derecha_laser_)
     {
       marker_derecha.color.g = 0.0;
       marker_derecha.color.r = 1.0;
     }
-    else if(izquierda_laser_)
+    else if (izquierda_laser_)
     {
       marker_izq.color.g = 0.0;
       marker_izq.color.r = 1.0;
@@ -206,6 +203,6 @@ void LaserRobot::markers()
     msg_array.markers[1] = marker_izq;
     msg_array.markers[2] = marker_derecha;
     pub_marker_array_.publish(msg_array);
-  }
+}
 
-} 
+}  // namespace laser_go
