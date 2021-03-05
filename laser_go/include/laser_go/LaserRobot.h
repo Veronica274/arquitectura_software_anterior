@@ -18,9 +18,9 @@
 #include "ros/ros.h"
 
 #include "geometry_msgs/Twist.h"
-#include "sensor_msgs/LaserScan.h" 
-#include "visualization_msgs/Marker.h" 
-#include "visualization_msgs/MarkerArray.h" 
+#include "sensor_msgs/LaserScan.h"
+#include "visualization_msgs/Marker.h"
+#include "visualization_msgs/MarkerArray.h"
 
 #include <random>
 #include "cmath"
@@ -36,7 +36,6 @@ public:
 
 protected:
     virtual void laserCallback(const sensor_msgs::LaserScan::ConstPtr& msg);
-    
     ros::NodeHandle n_;
 
     static const int GOING_FORWARD = 0;
@@ -58,10 +57,10 @@ protected:
     ros::Publisher pub_marker_;
     ros::Publisher pub_marker_array_;
 
-    double turning_time_; 
-    double backing_time_; 
-}; // namespace laser_go
+    double turning_time_;
+    double backing_time_;
+};
 
-}  // LASER_GO_LASERROBOT_H
+}  // namespace laser_go
 
-#endif
+#endif  // LASER_GO_LASERROBOT_H

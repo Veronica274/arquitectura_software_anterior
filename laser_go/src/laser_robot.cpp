@@ -84,7 +84,7 @@ public:
         {
           centro_laser_ = 1;
           press_ts_ = ros::Time::now();
-          int random = rand_r() % 2;
+          int random = rand() % 2;
           // Esta parte hay que hacerla aleatoria
           // ROS_INFO("0 derecha 1 izquierda %d \n", random);
           if (random == 0)
