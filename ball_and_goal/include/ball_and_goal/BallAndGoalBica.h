@@ -1,34 +1,32 @@
-#ifndef BALL_AND_GOAL_FIND_OBJECT_H_
-#define BALL_AND_GOAL_FIND_OBJECT_H_
+#ifndef BALL_AND_GOAL__BALL_AND_GOAL_BICA_H__
+#define BALL_AND_GOAL__BALL_AND_GOAL_BICA_H__
 
-#include "Bica/component.h"
-#include "geometry_msgs/Twist.h"
+#include "ball_and_goal.h"
 #include "ros/ros.h"
-
+#include "std_msgs/Bool.h"
 namespace ball_and_goal
 {
-class FindObject : public bica::component
+
+class BallAndGoalBica : public bica::ball_and_goal
 {
 public:
-    FindObject(): it_(nh_), is_object_(false)
-    {
-        image_sub_ = it_.subscribe("/camera/rgb/image_raw", 1, &FindObject::imageCb, this);
-        image_pub_ = it_.advertise("/hsv/image_filtered", 1);
-        hsv_sub_ = it_.subscribe("/hsv/image_filtered", 1, &FindObject::hsvCb, this);
-    }
-    
-    virtual void FindObject::imageCb(){};
-    virtual void FindObject::hsvCb(){};
+    BallAndGoalBica();
+    void obstacle_callback(const std_msgs::Bool::ConstPtr& msg);
+
+
+    bool GoBlue_2_GoBall();
+	bool GoBall_2_Turn(); 
+	bool Turn_2_GoYellow(); 
+	bool GoYellow_2_GoBlue(); 
 
 private:
     ros::NodeHandle nh_;
+    ros::Subscriber obstacle_sub_;
 
-    ros::Subscriber image_sub_;
-    ros::Publisher image_sub_;
-    ros::Subscriber hsv_sub_;
+    bool is_obstacle_;
 
-    bool is_object_;
-}
-}
+};
 
-#endif // BALL_AND_GOAL_FIND_OBJECT_H_
+} // ball_and_goal
+
+#endif // BALL_AND_GOAL__BALL_AND_GOAL_BICA_H__
