@@ -25,14 +25,33 @@ catkin_package(
 
 find_package(OpenCV)
 include_directories(
-    ${OpenCV_INCLUDE_DIRS}
-    ${catkin_INCLUDE_DIRS}
+  include
+  fsm
+  ${OpenCV_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(find_yellow_goal src/find_yellow_goal.cpp)
+add_library(${PROJECT_NAME}
+   src/${PROJECT_NAME}/FindBall.cpp
+   fsm/ball_and_goal.cpp
+ )
 
-target_link_libraries(find_yellow_goal ${catkin_LIBRARIES})
+
+add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_executable(find_ball_node src/find_ball_node.cpp)
+add_dependencies(find_ball_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(find_ball_node ${PROJECT_NAME} ${catkin_LIBRARIES})
+
 
 roslint_cpp(
- src/find_yellow_goal.cpp
+ src/find_ball_node.cpp
 )
+
+
+
+
+
+
+
+
