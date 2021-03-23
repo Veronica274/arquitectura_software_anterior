@@ -1,0 +1,28 @@
+<component id="ball_and_goal">
+ <state y="-31" x="-239" id="GoBall" initial="false">
+  <activation id="find_ball"/>
+  <activation id="go_ball"/>
+ </state>
+ <state y="-31" x="-525" id="GoYellow" initial="true">
+  <activation id="go_yellow"/>
+  <activation id="find_yellow"/>
+ </state>
+ <state y="104" x="-386" id="Turn" initial="false">
+  <activation id="turn"/>
+ </state>
+ <state y="-177" x="-380" id="GoBlue" initial="false">
+  <activation id="go_blue"/>
+  <activation id="find_blue"/>
+ </state>
+ <component y="38" x="-622" id="go_yellow"/>
+ <component y="-99" x="-624" id="find_yellow"/>
+ <component y="30" x="-151" id="go_ball"/>
+ <component y="-276" x="-299" id="go_blue"/>
+ <component y="217" x="-386" id="turn"/>
+ <component y="-273" x="-457" id="find_blue"/>
+ <component y="-102" x="-146" id="find_ball"/>
+ <transition src="GoBlue" dst="GoBall"/>
+ <transition src="GoBall" dst="Turn"/>
+ <transition src="Turn" dst="GoYellow"/>
+ <transition src="GoYellow" dst="GoBlue"/>
+</component>
