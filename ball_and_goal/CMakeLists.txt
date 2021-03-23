@@ -3,6 +3,7 @@ project(ball_and_goal)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  bica
   image_transport
   cv_bridge
   std_msgs
@@ -12,7 +13,14 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 catkin_package(
-  CATKIN_DEPENDS roscpp std_msgs kobuki_msgs sensor_msgs image_transport cv_bridge
+  CATKIN_DEPENDS
+  roscpp
+  bica
+  std_msgs
+  kobuki_msgs
+  sensor_msgs
+  image_transport
+  cv_bridge
 )
 
 find_package(OpenCV)
