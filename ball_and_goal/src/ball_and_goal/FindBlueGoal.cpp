@@ -21,7 +21,10 @@ FindBlueGoal::FindBlueGoal(): it_(nh_)
 void
 FindBlueGoal::imageCb(const sensor_msgs::Image::ConstPtr& msg)
 {
-    std_msgs::Bool msg;
+    if(!isActive()){
+        return;
+    }
+    
     geometry_msgs::Twist msg2;
     int pos_x,pos_y;
 
@@ -69,7 +72,6 @@ FindBlueGoal::imageCb(const sensor_msgs::Image::ConstPtr& msg)
                 msg2.linear.x = 0.2;
             }
             msg2.angular.z = 0.0;
-            is_obstacle_ = true;         
         }
         
     } else {
@@ -79,20 +81,6 @@ FindBlueGoal::imageCb(const sensor_msgs::Image::ConstPtr& msg)
     vel_pub_.publish(msg2);
 
 }
-
-void
-FindBlueGoal::step()
-{
-    if(!isActive()){
-        return;
-    }
-    geometry_msgs::Twist msg;
-
-    msg.linear.x = -0.5;
-
-    vel_pub_.publish(msg);
-}
-
 
 } // ball_and_goal
 
