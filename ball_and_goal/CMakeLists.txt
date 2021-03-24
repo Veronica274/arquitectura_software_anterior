@@ -3,6 +3,7 @@ project(ball_and_goal)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  bica
   image_transport
   cv_bridge
   std_msgs
@@ -12,19 +13,45 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 catkin_package(
-  CATKIN_DEPENDS roscpp std_msgs kobuki_msgs sensor_msgs image_transport cv_bridge
+  CATKIN_DEPENDS
+  roscpp
+  bica
+  std_msgs
+  kobuki_msgs
+  sensor_msgs
+  image_transport
+  cv_bridge
 )
 
 find_package(OpenCV)
 include_directories(
-    ${OpenCV_INCLUDE_DIRS}
-    ${catkin_INCLUDE_DIRS}
+  include
+  fsm
+  ${OpenCV_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(find_yellow_goal src/find_yellow_goal.cpp)
+add_library(${PROJECT_NAME}
+   src/${PROJECT_NAME}/FindBall.cpp
+   fsm/ball_and_goal.cpp
+ )
 
-target_link_libraries(find_yellow_goal ${catkin_LIBRARIES})
+
+add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_executable(find_ball_node src/find_ball_node.cpp)
+add_dependencies(find_ball_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(find_ball_node ${PROJECT_NAME} ${catkin_LIBRARIES})
+
 
 roslint_cpp(
- src/find_yellow_goal.cpp
+ src/find_ball_node.cpp
 )
+
+
+
+
+
+
+
+
