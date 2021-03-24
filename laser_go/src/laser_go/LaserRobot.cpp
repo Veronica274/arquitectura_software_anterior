@@ -36,7 +36,6 @@ LaserRobot::LaserRobot()
     state_ = GOING_FORWARD;
     sub_laser_ = n_.subscribe("/scan", 1, &LaserRobot::laserCallback, this);
     pub_vel_ = n_.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 1);
-    pub_marker_ = n_.advertise<visualization_msgs::Marker>("/visualization_markers", 1);
     pub_marker_array_ = n_.advertise<visualization_msgs::MarkerArray>("/visualization_markers_array", 1);
 }
 
@@ -46,8 +45,8 @@ void LaserRobot::laserCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
     // Como el incremento del ángulo es negativo, lo haremos positivo para que las operaciones nos den bien.
     grados_centro_ = msg->ranges.size()/2 * msg->angle_increment * (-1);
     centro_ = msg->ranges[msg->ranges.size()/2] < MIN_DIST;
-    izquierda_ = msg->ranges[(grados_centro_ - (M_PI/5))/((-1)*msg->angle_increment)] < MIN_DIST;
-    derecha_ = msg->ranges[(grados_centro_ + (M_PI/5))/((-1)*msg->angle_increment)] < MIN_DIST;
+    izquierda_ = msg->ranges[(grados_centro_ - (M_PI/5))/(-msg->angle_increment)] < MIN_DIST;
+    derecha_ = msg->ranges[(grados_centro_ + (M_PI/5))/(-msg->angle_increment)] < MIN_DIST;
 }
 
 void LaserRobot::step()
@@ -174,15 +173,15 @@ void LaserRobot::markers()
     marker_izq = marker_centro;
     marker_izq.header.frame_id = "base_link";
     marker_izq.id = 1;
-    marker_izq.pose.position.x = cos(M_PI/5) * MIN_DIST;
-    marker_izq.pose.position.y = sin(M_PI/5) * MIN_DIST;
+    marker_izq.pose.position.x = cos(M_PI / 5) * MIN_DIST;
+    marker_izq.pose.position.y = sin(M_PI / 5) * MIN_DIST;
 
     visualization_msgs::Marker marker_derecha;
     marker_derecha = marker_centro;
     marker_derecha.header.frame_id = "base_link";
     marker_derecha.id = 2;
-    marker_derecha.pose.position.x = (cos(M_PI/5)) * MIN_DIST;
-    marker_derecha.pose.position.y = sin(M_PI/5)*(-1) * MIN_DIST;
+    marker_derecha.pose.position.x = cos(M_PI / 5) * MIN_DIST;
+    marker_derecha.pose.position.y = sin(M_PI / 5) * -MIN_DIST;
     if (centro_laser_)
     {
       marker_centro.color.g = 0.0;
