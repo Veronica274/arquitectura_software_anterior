@@ -13,7 +13,6 @@ public:
     BallAndGoalBica();
     void obstacle_callback(const std_msgs::Bool::ConstPtr& msg);
 
-
     bool GoBlue_2_GoBall();
 	bool GoBall_2_Turn(); 
 	bool Turn_2_GoYellow(); 
@@ -22,8 +21,6 @@ public:
 private:
     ros::NodeHandle nh_;
     ros::Subscriber obstacle_sub_;
-
-    bool is_obstacle_;
 
 };
 

@@ -18,12 +18,12 @@
 *      contributors may be used to endorse or promote products derived
 *      from this software without specific prior written permission.
 
-*   THIS SOFTWARE IS PROVball_and_goalED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+*   THIS SOFTWARE IS PROVball_and_goal_bicaED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 *   FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 *   COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-*   INCball_and_goalENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+*   INCball_and_goal_bicaENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
 *   BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 *   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 *   CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
@@ -35,8 +35,8 @@
 /* Author: Francisco Martín fmrico@gmail.com */
 
 /* Mantainer: Francisco Martín fmrico@gmail.com */
-#ifndef BALL_AND_GOAL_H_
-#define BALL_AND_GOAL_H_
+#ifndef BALL_AND_GOAL_BICA_H_
+#define BALL_AND_GOAL_BICA_H_
 
 #include <bica/Component.h>
 #include <ros/ros.h>
@@ -47,27 +47,27 @@
 
 namespace bica
 {
-class ball_and_goal : public bica::Component
+class ball_and_goal_bica : public bica::Component
 {
 public:
-  ball_and_goal();
-  virtual ~ball_and_goal();
+  ball_and_goal_bica();
+  virtual ~ball_and_goal_bica();
 
   void activateCode();
 
-  	virtual void GoBall_code_iterative() {};
-	virtual void GoBall_code_once() {};
-	virtual void GoYellow_code_iterative() {};
-	virtual void GoYellow_code_once() {};
+  	virtual void Go_yellow_code_iterative() {};
+	virtual void Go_yellow_code_once() {};
 	virtual void Turn_code_iterative() {};
 	virtual void Turn_code_once() {};
-	virtual void GoBlue_code_iterative() {};
-	virtual void GoBlue_code_once() {};
+	virtual void Go_blue_code_iterative() {};
+	virtual void Go_blue_code_once() {};
+	virtual void Go_ball_code_iterative() {};
+	virtual void Go_ball_code_once() {};
 
-  	virtual bool GoBlue_2_GoBall() {return false;};
-	virtual bool GoBall_2_Turn() {return false;};
-	virtual bool Turn_2_GoYellow() {return false;};
-	virtual bool GoYellow_2_GoBlue() {return false;};
+  	virtual bool Turn_2_Go_yellow() {return false;};
+	virtual bool Go_ball_2_Turn() {return false;};
+	virtual bool Go_blue_2_Go_ball() {return false;};
+	virtual bool Go_yellow_2_Go_blue() {return false;};
 
 
   bool ok();
@@ -79,17 +79,16 @@ private:
   void step() {}
 
   	void deactivateAllDeps();
-	void GoBall_activateDeps();
-	void GoYellow_activateDeps();
+	void Go_yellow_activateDeps();
 	void Turn_activateDeps();
-	void GoBlue_activateDeps();
+	void Go_blue_activateDeps();
+	void Go_ball_activateDeps();
 
 
-  	static const int GOBALL = 0;
-	static const int GOYELLOW = 1;
-	static const int TURN = 2;
-	static const int GOBLUE = 3;
-
+  	static const int GO_YELLOW = 0;
+	static const int TURN = 1;
+	static const int GO_BLUE = 2;
+	static const int GO_BALL = 3;
 
   int state_;
 
@@ -100,4 +99,4 @@ private:
 
 } /* namespace bica */
 
-#endif /* BALL_AND_GOAL_H_ */
+#endif /* BALL_AND_GOAL_BICA_H_ */

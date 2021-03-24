@@ -18,12 +18,12 @@
 *      contributors may be used to endorse or promote products derived
 *      from this software without specific prior written permission.
 
-*   THIS SOFTWARE IS PROVball_and_goalED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+*   THIS SOFTWARE IS PROVball_and_goal_bicaED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 *   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 *   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 *   FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 *   COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-*   INCball_and_goalENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+*   INCball_and_goal_bicaENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
 *   BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 *   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 *   CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
@@ -36,33 +36,33 @@
 
 /* Mantainer: Francisco Martín fmrico@gmail.com */
 
-#include "ball_and_goal.h"
+#include "ball_and_goal_bica.h"
 
 namespace bica
 {
-ball_and_goal::ball_and_goal() : state_(GOYELLOW), myBaseId_("ball_and_goal")
+ball_and_goal_bica::ball_and_goal_bica() : state_(GO_YELLOW), myBaseId_("ball_and_goal_bica")
 {
   state_ts_ = ros::Time::now();
   state_pub_ = nh_.advertise<std_msgs::String>("/" + myBaseId_ + "/state", 1, false);
 }
 
-ball_and_goal::~ball_and_goal()
+ball_and_goal_bica::~ball_and_goal_bica()
 {
 }
 
-void ball_and_goal::activateCode()
+void ball_and_goal_bica::activateCode()
 {
   	deactivateAllDeps();
 
-	state_ = GOYELLOW;
+	state_ = GO_YELLOW;
 	state_ts_ = ros::Time::now();
 
-	GoYellow_activateDeps();
-	GoYellow_code_once();
+	Go_yellow_activateDeps();
+	Go_yellow_code_once();
 
 }
 
-bool ball_and_goal::ok()
+bool ball_and_goal_bica::ok()
 {
   if (active_)
   {
@@ -70,12 +70,69 @@ bool ball_and_goal::ok()
 
     switch (state_)
     {
-      	case GOBALL:
+      	case GO_YELLOW:
 
-	GoBall_code_iterative();
+	Go_yellow_code_iterative();
 
-	msg.data = "GoBall";
-	if(GoBall_2_Turn())
+	msg.data = "Go_yellow";
+	if(Go_yellow_2_Go_blue())
+	{
+
+	deactivateAllDeps();
+
+	state_ = GO_BLUE;
+	state_ts_ = ros::Time::now();
+
+	Go_blue_activateDeps();
+	Go_blue_code_once();
+	}
+	state_pub_.publish(msg);
+	break;
+
+	case TURN:
+
+	Turn_code_iterative();
+
+	msg.data = "Turn";
+	if(Turn_2_Go_yellow())
+	{
+
+	deactivateAllDeps();
+
+	state_ = GO_YELLOW;
+	state_ts_ = ros::Time::now();
+
+	Go_yellow_activateDeps();
+	Go_yellow_code_once();
+	}
+	state_pub_.publish(msg);
+	break;
+
+	case GO_BLUE:
+
+	Go_blue_code_iterative();
+
+	msg.data = "Go_blue";
+	if(Go_blue_2_Go_ball())
+	{
+
+	deactivateAllDeps();
+
+	state_ = GO_BALL;
+	state_ts_ = ros::Time::now();
+
+	Go_ball_activateDeps();
+	Go_ball_code_once();
+	}
+	state_pub_.publish(msg);
+	break;
+
+	case GO_BALL:
+
+	Go_ball_code_iterative();
+
+	msg.data = "Go_ball";
+	if(Go_ball_2_Turn())
 	{
 
 	deactivateAllDeps();
@@ -89,63 +146,6 @@ bool ball_and_goal::ok()
 	state_pub_.publish(msg);
 	break;
 
-	case GOYELLOW:
-
-	GoYellow_code_iterative();
-
-	msg.data = "GoYellow";
-	if(GoYellow_2_GoBlue())
-	{
-
-	deactivateAllDeps();
-
-	state_ = GOBLUE;
-	state_ts_ = ros::Time::now();
-
-	GoBlue_activateDeps();
-	GoBlue_code_once();
-	}
-	state_pub_.publish(msg);
-	break;
-
-	case TURN:
-
-	Turn_code_iterative();
-
-	msg.data = "Turn";
-	if(Turn_2_GoYellow())
-	{
-
-	deactivateAllDeps();
-
-	state_ = GOYELLOW;
-	state_ts_ = ros::Time::now();
-
-	GoYellow_activateDeps();
-	GoYellow_code_once();
-	}
-	state_pub_.publish(msg);
-	break;
-
-	case GOBLUE:
-
-	GoBlue_code_iterative();
-
-	msg.data = "GoBlue";
-	if(GoBlue_2_GoBall())
-	{
-
-	deactivateAllDeps();
-
-	state_ = GOBALL;
-	state_ts_ = ros::Time::now();
-
-	GoBall_activateDeps();
-	GoBall_code_once();
-	}
-	state_pub_.publish(msg);
-	break;
-
 
     }
   }
@@ -154,42 +154,36 @@ bool ball_and_goal::ok()
 }
 
 void
-ball_and_goal::deactivateAllDeps()
+ball_and_goal_bica::deactivateAllDeps()
 {
-	removeDependency("go_yellow");
-	removeDependency("find_yellow");
-	removeDependency("go_ball");
 	removeDependency("go_blue");
+	removeDependency("go_ball");
+	removeDependency("go_yellow");
 	removeDependency("turn");
-	removeDependency("find_blue");
-	removeDependency("find_ball");
 };
 
 void
-ball_and_goal::GoBall_activateDeps()
-{
-	addDependency("find_ball");
-	addDependency("go_ball");
-}
-
-void
-ball_and_goal::GoYellow_activateDeps()
+ball_and_goal_bica::Go_yellow_activateDeps()
 {
 	addDependency("go_yellow");
-	addDependency("find_yellow");
 }
 
 void
-ball_and_goal::Turn_activateDeps()
+ball_and_goal_bica::Turn_activateDeps()
 {
 	addDependency("turn");
 }
 
 void
-ball_and_goal::GoBlue_activateDeps()
+ball_and_goal_bica::Go_blue_activateDeps()
 {
 	addDependency("go_blue");
-	addDependency("find_blue");
+}
+
+void
+ball_and_goal_bica::Go_ball_activateDeps()
+{
+	addDependency("go_ball");
 }
 
 

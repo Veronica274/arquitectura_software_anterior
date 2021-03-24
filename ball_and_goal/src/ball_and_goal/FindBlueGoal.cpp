@@ -1,4 +1,4 @@
-#include "ball_and_goal/FindBall.h"
+#include "ball_and_goal/FindBlueGoal.h"
 
 
 #include "geometry_msgs/Twist.h"
@@ -12,15 +12,14 @@
 namespace ball_and_goal
 {
 
-FindBall::FindBall(): it_(nh_)
+FindBlueGoal::FindBlueGoal(): it_(nh_)
 {
-    image_sub_ = it_.subscribe("/camera/rgb/image_raw", 1, &FindBall::imageCb, this);
+    image_sub_ = it_.subscribe("/hsv/image_filtered", 1, &FindBlueGoal::imageCb, this);
     vel_pub_ = nh_.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 1);
-    obstacle_pub_ = nh_.advertise<std_msgs::Bool>("/obstacle", 1);
 }
 
 void
-FindBall::imageCb(const sensor_msgs::Image::ConstPtr& msg)
+FindBlueGoal::imageCb(const sensor_msgs::Image::ConstPtr& msg)
 {
     std_msgs::Bool msg;
     geometry_msgs::Twist msg2;
@@ -43,46 +42,46 @@ FindBall::imageCb(const sensor_msgs::Image::ConstPtr& msg)
     for (int i=0; i < height; i++ ){
         for (int j=0; j < width; j++ )
         {
-        int posdata = i * step + j * channels;
-        
-        if((hsv.data[posdata] >= 102) && (hsv.data[posdata] <= 125) && (hsv.data[posdata+1]  >=0) && (hsv.data[posdata+1] <= 255)&& (hsv.data[posdata+2]  >=0) && (hsv.data[posdata+2] <= 255 ))
-        {
-            x += j;
-            y += i;
-            counter++; 
-        }
-        
+            int posdata = i * step + j * channels;
+            
+            if((hsv.data[posdata] >= 0) && (hsv.data[posdata] <= 153) && (hsv.data[posdata+1]  >= 176) && (hsv.data[posdata+1] <= 223) && (hsv.data[posdata+2]  >=70) && (hsv.data[posdata+2] <= 92))
+            {
+                x += j;
+                y += i;
+                counter++;
+            } 
         }
     }
     if (counter > 0){
         //ROS_INFO("Ball at %d %d", x / counter , y / counter);
         pos_x = x / counter;
         pos_y = y / counter;
-        while(is_obstacle_ == false){
-            msg2.angular.z = 0.5;
-            if(pos_x >= 200 && pos_x <= 300)
-            {
-                msg2.angular.z = 0.0;
-                msg2.linear.x = 0.2;
-                is_obstacle_ = true;
-            }
-
-        }
        
+        msg2.angular.z = 0.5;
+        if(pos_x >= 200 && pos_x <= 300)
+        {
+            if (pos_y <= 100)
+            {
+                msg2.linear.x = 0.0;
+            }
+            else 
+            {
+                msg2.linear.x = 0.2;
+            }
+            msg2.angular.z = 0.0;
+            is_obstacle_ = true;         
+        }
+        
     } else {
         ROS_INFO("NO BALL FOUND");
-        is_obstacle_ = false;
     }
 
     vel_pub_.publish(msg2);
-    msg.data = is_obstacle_ ;
-    obstacle_pub_.publish(msg);
 
 }
 
-
 void
-FindBall::step()
+FindBlueGoal::step()
 {
     if(!isActive()){
         return;
