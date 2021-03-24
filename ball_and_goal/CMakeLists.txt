@@ -33,6 +33,7 @@ include_directories(
 
 add_library(${PROJECT_NAME}
    src/${PROJECT_NAME}/FindBall.cpp
+   src/${PROJECT_NAME}/FindBlueGoal.cpp
    fsm/ball_and_goal.cpp
  )
 
