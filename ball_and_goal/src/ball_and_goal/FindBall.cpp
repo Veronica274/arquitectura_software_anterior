@@ -22,13 +22,11 @@ FindBall::FindBall() : it_(nh_) , buffer_() , listener_(buffer_)
     image_sub_ = it_.subscribe("/hsv/image_filtered", 1, &FindBall::imageCb, this);
     vel_pub_ = nh_.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 1);
 }
-
+/*
 double
 FindBall::publish_detection(float x, float y)
 {
     double angle;
-    x = 1;
-    y = 0;
 
     geometry_msgs::TransformStamped odom2bf_msg;
     /*try{
@@ -37,7 +35,7 @@ FindBall::publish_detection(float x, float y)
     {
         ROS_ERROR("cv_bridge exception: %s", e.what());
         return ;
-    }*/
+    }
 
     tf2::Stamped<tf2::Transform> odom2bf;
     tf2::fromMsg(odom2bf_msg, odom2bf);
@@ -58,20 +56,20 @@ FindBall::publish_detection(float x, float y)
     broadcaster.sendTransform(odom2object_msg);
 
     geometry_msgs::TransformStamped bf2obj_2_msg;
-    /*try {
+    try {
         bf2obj_2_msg = buffer_.lookupTransform( "base_footprint", "object", ros::Time(0));
     } catch (std::exception & e)
     {
         ROS_ERROR("cv_bridge exception: %s", e.what());
         return;
-    }*/
+    }
 
     //angulo del robot respecto a la pelota
     angle = atan2(bf2obj_2_msg.transform.translation.y, bf2obj_2_msg.transform.translation.x);
     return angle;
 
 }
-
+*/
 void
 FindBall::imageCb(const sensor_msgs::Image::ConstPtr& msg)
 {
@@ -117,7 +115,7 @@ FindBall::imageCb(const sensor_msgs::Image::ConstPtr& msg)
         //ROS_INFO("Ball at %d %d", x / counter , y / counter);
         pos_x = x / counter;
         pos_y = y / counter;
-
+        /*
        angle = publish_detection(l, p);
        if( angle >= -0.1 && angle <= 0.1) 
        {
@@ -129,22 +127,23 @@ FindBall::imageCb(const sensor_msgs::Image::ConstPtr& msg)
            msg2.linear.x = 0.0;
            msg2.angular.z = 0.5;
        }
-    //    msg2.angular.z = 0.5;
-    //    if(pos_x >= 200 && pos_x <= 300)
-    //    {
-    //        if (pos_y <= 100)
-    //        {
-    //            msg2.linear.x = 0.0;
-    //        }
-    //        else 
-    //        {
-    //            msg2.linear.x = 0.2;
-    //        }
-    //        msg2.angular.z = 0.0;
-    //    }
-    //    
-    //} else {
-    //    ROS_INFO("NO BALL FOUND");
+       */
+        msg2.angular.z = 0.5;
+        if(pos_x >= 200 && pos_x <= 300)
+        {
+            if (pos_y <= 100)
+            {
+                msg2.linear.x = 0.0;
+            }
+            else 
+            {
+                msg2.linear.x = 0.2;
+            }
+            msg2.angular.z = 0.0;
+        }
+        
+    } else {
+        ROS_INFO("NO BALL FOUND");
 
     }
 
