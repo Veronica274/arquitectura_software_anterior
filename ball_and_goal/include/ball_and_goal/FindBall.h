@@ -19,8 +19,6 @@
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include "tf2/convert.h"
 
-#include "geometry_tf/transforms.h"
-
 namespace bump_and_go_bica
 {
 
@@ -31,7 +29,7 @@ public:
     void imageCb(const sensor_msgs::Image::ConstPtr& msg);
     double publish_detection(float x, float y);
 
-private:
+protected:
     ros::NodeHandle nh_;
     ros::Publisher vel_pub_;
     ros::Subscriber image_sub_;

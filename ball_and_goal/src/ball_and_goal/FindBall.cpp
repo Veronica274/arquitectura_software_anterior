@@ -1,5 +1,5 @@
-#include "ball_and_goal/FindBall.h"
 
+#include "ball_and_goal/FindBall.h"
 
 #include "geometry_msgs/Twist.h"
 #include "bica/Component.h"
@@ -12,10 +12,10 @@
 namespace ball_and_goal
 {
 
-FindBall::FindBall(): it_(nh_) , buffer_() , listener_(buffer)
+FindBall::FindBall() : it_(nh_) , buffer_() , listener_(buffer)
 {
     image_sub_ = it_.subscribe("/hsv/image_filtered", 1, &FindBall::imageCb, this);
-    vel_pub_ = nh_.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 1);
+    vel_pub_ = it_.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 1);
 }
 
 double
@@ -68,6 +68,7 @@ FindBall::publish_detection(float x, float y)
 void
 FindBall::imageCb(const sensor_msgs::Image::ConstPtr& msg)
 {
+    double angle;
     if(!isActive()){
         return;
     }
