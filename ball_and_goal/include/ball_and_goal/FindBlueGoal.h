@@ -19,8 +19,6 @@
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include "tf2/convert.h"
 
-#include "geometry_tf/transforms.h"
-
 namespace bump_and_go_bica
 {
 
