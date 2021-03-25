@@ -1,13 +1,13 @@
 #include "ros/ros.h"
 
-#include "girar_bica/Turn.hpp"
+#include "ball_and_goal/Turn.h"
 
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "turn");
   ros::NodeHandle n;
 
-  girar_bica::Turn turn;
+  ball_and_goal_bica::Turn turn;
 
   ros::Rate loop_rate(20);
 

@@ -5,23 +5,26 @@
 #include "ros/ros.h"
 #include "std_msgs/Bool.h"
 
-namespace ball_and_goal
+namespace ball_and_goal_bica 
 {
-class BallAndGoalBica : public bica::ball_and_goal
+class BallAndGoalBica : public bica::ball_and_goal_bica
 {
 public:
     BallAndGoalBica();
-    void obstacle_callback(const std_msgs::Bool::ConstPtr& msg);
 
     bool Turn_2_Go_yellow();
 	bool Go_ball_2_Turn();
 	bool Go_blue_2_Go_ball();
 	bool Go_yellow_2_Go_blue();
 
+
 private:
+
+    void CAMBIAR_callback(const std_msgs::Bool::ConstPtr msg);
+
     ros::NodeHandle nh_;
     ros::Subscriber obstacle_sub_;
-
+    bool is_obstacle_;
 };
 
 } // ball_and_goal

@@ -37,7 +37,11 @@ include_directories(
   fsm
   ${OpenCV_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
-  
+  ${PCL_INCLUDE_DIRS}
+)
+
+link_directories(
+	${PCL_LIBRARY_DIRS}
 )
 
 add_library(${PROJECT_NAME}

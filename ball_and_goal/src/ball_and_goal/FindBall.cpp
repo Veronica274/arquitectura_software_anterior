@@ -9,29 +9,35 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <std_msgs/Float32.h>
-namespace ball_and_goal
+
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
+
+namespace ball_and_goal_bica
 {
 
-FindBall::FindBall() : it_(nh_) , buffer_() , listener_(buffer)
+FindBall::FindBall() : it_(nh_) , buffer_() , listener_(buffer_) 
 {
     image_sub_ = it_.subscribe("/hsv/image_filtered", 1, &FindBall::imageCb, this);
-    vel_pub_ = it_.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 1);
+    vel_pub_ = nh_.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 1);
 }
 
 double
 FindBall::publish_detection(float x, float y)
 {
     double angle;
-    float x = 1;
-    float y = 0;
+    x = 1;
+    y = 0;
 
     geometry_msgs::TransformStamped odom2bf_msg;
-    try{
+    /*try{
         odom2bf_msg = buffer_.lookupTransform("odom", "base_footprint", ros::Time(0));
     }   catch (std::exception & e)
     {
-        return;
-    }
+        ROS_ERROR("cv_bridge exception: %s", e.what());
+        return ;
+    }*/
 
     tf2::Stamped<tf2::Transform> odom2bf;
     tf2::fromMsg(odom2bf_msg, odom2bf);
@@ -52,12 +58,13 @@ FindBall::publish_detection(float x, float y)
     broadcaster.sendTransform(odom2object_msg);
 
     geometry_msgs::TransformStamped bf2obj_2_msg;
-    try {
+    /*try {
         bf2obj_2_msg = buffer_.lookupTransform( "base_footprint", "object", ros::Time(0));
     } catch (std::exception & e)
     {
+        ROS_ERROR("cv_bridge exception: %s", e.what());
         return;
-    }
+    }*/
 
     //angulo del robot respecto a la pelota
     angle = atan2(bf2obj_2_msg.transform.translation.y, bf2obj_2_msg.transform.translation.x);

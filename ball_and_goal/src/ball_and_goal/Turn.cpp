@@ -4,7 +4,7 @@
 #include "geometry_msgs/Twist.h"
 #include "ros/ros.h"
 
-namespace girar_bica
+namespace ball_and_goal_bica
 {
 Turn::Turn()
 {
