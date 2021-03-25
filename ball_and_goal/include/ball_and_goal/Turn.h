@@ -1,11 +1,11 @@
-#ifndef  GIRAR_BICA__TURN_HPP__
-#define  GIRAR_BICA__TURN_HPP__
+#ifndef  BALL_AND_GOAL__TURN_H__
+#define  BALL_AND_GOAL__TURN_H__
 
 #include "bica/Component.h"
 #include "geometry_msgs/Twist.h"
 #include "ros/ros.h"
 
-namespace girar_bica
+namespace ball_and_goal_bica
 {
 
 class Turn : public bica::Component
@@ -22,4 +22,4 @@ private:
 
 }  //  girar_bica
 
-#endif //GIRAR_BICA__TURN_HPP__
+#endif //BALL_AND_GOAL__TURN_HPP__

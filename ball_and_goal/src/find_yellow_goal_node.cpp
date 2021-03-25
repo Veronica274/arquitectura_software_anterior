@@ -6,7 +6,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "go_yellow_node");
   ros::NodeHandle n;
 
-  ball_and_goal::FindYellowGoal go_yellow_node;
+  ball_and_goal_bica::FindYellowGoal go_yellow_node;
 
   ros::Rate loop_rate(5);
 
