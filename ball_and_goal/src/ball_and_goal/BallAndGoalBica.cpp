@@ -8,16 +8,6 @@ namespace ball_and_goal_bica
 
 BallAndGoalBica::BallAndGoalBica() 
 {
-    obstacle_sub_ = nh_.subscribe("obstacle", 10, &BallAndGoalBica::CAMBIAR_callback, this);
-}
-
-
-//Callback de prueba, hay que cambiar
-void
-BallAndGoalBica::CAMBIAR_callback(const std_msgs::Bool::ConstPtr msg)
-{
-    is_obstacle_ = msg->data;
-
 }
 
 bool

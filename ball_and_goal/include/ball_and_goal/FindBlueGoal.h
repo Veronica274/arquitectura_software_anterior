@@ -32,7 +32,6 @@ public:
 private:
     ros::NodeHandle nh_;
     ros::Publisher vel_pub_;
-    ros::Subscriber image_subscriber_;
 
     tf2_ros::Buffer buffer_;
     tf2_ros::TransformListener listener_;
@@ -40,7 +39,6 @@ private:
 
     image_transport::ImageTransport it_;
     image_transport::Subscriber image_sub_;
-    image_transport::Publisher image_pub_;
 
 };
 
