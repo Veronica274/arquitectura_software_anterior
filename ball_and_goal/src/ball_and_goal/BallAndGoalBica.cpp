@@ -1,36 +1,33 @@
-
 # include "ros/ros.h"
-# include "ball_and_goal/BallAndGoal.h"
+# include "ball_and_goal/BallAndGoalBica.h"
 
-# define MAX_TIME
+# define MAX_TIME 30.0
 
 namespace ball_and_goal
 {
-BallAndGoalBica::BallAndGoalBica()
+BallAndGoalBica::BallAndGoalBica() {}
+
+bool
+BallAndGoalBica::Go_yellow_2_Go_blue()
 {
+    return (ros::Time::now() - state_ts_).toSec() > MAX_TIME;
 }
 
 bool
-BallAndGoal::Go_yellow_2_Go_blue()
+BallAndGoalBica::Go_blue_2_Go_ball()
 {
-    return (ros::Time::now()-state_ts_(.toSec() > MAX_TIME))
+    return (ros::Time::now() - state_ts_).toSec() > MAX_TIME;
 }
 
 bool
-BallAndGoal::Go_blue_2_Go_ball()
+BallAndGoalBica::Go_ball_2_Turn()
 {
-    return (ros::Time::now()-state_ts_(.toSec() > MAX_TIME))
+    return (ros::Time::now() - state_ts_).toSec() > MAX_TIME;
 }
 
 bool
-BallAndGoal::Go_ball_2_Turn()
+BallAndGoalBica::Turn_2_Go_yellow()
 {
-    return (ros::Time::now()-state_ts_(.toSec() > MAX_TIME))
+    return (ros::Time::now() - state_ts_).toSec() > 5.0;
 }
-
-bool
-BallAndGoal::Turn_2_Go_yellow()
-{
-    return (ros::Time::now()-state_ts_(.toSec() > MAX_TIME))
-}
-}
+}  // ball_and_goal

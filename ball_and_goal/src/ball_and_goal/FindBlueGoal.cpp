@@ -18,6 +18,53 @@ FindBlueGoal::FindBlueGoal(): it_(nh_)
     vel_pub_ = nh_.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 1);
 }
 
+// double
+// FindBall::publish_detection(float x, float y)
+// {
+//     double angle;
+//     float x = 1;
+//     float y = 0;
+
+//     geometry_msgs::TransformStamped odom2bf_msg;
+//     try{
+//         odom2bf_msg = buffer_.lookupTransform("odom", "base_footprint", ros::Time(0));
+//     }   catch (std::exception & e)
+//     {
+//         return;
+//     }
+
+//     tf2::Stamped<tf2::Transform> odom2bf;
+//     tf2::fromMsg(odom2bf_msg, odom2bf);
+
+//     tf2::Stamped<tf2::Transform> bf2object;
+//     bf2object.setOrigin(tf2::Vector3(x, y ,0));
+//     bf2object.setRotation(tf2::Quaternion(0, 0, 0, 1));
+
+//     tf2::Transform odom2object = odom2bf * bf2object;
+
+//     geometry_msgs::TransformStamped odom2object_msg;
+//     odom2object_msg.header.stamp = ros::Time::now();
+//     odom2object_msg.header.frame_id = "odom";
+//     odom2object_msg.child_frame_id = "object";
+
+//     odom2object_msg.transform = tf2::toMsg(odom2object);
+
+//     broadcaster.sendTransform(odom2object_msg);
+
+//     geometry_msgs::TransformStamped bf2obj_2_msg;
+//     try {
+//         bf2obj_2_msg = buffer_.lookupTransform( "base_footprint", "object", ros::Time(0));
+//     } catch (std::exception & e)
+//     {
+//         return;
+//     }
+
+//     //angulo del robot respecto a la pelota
+//     angle = atan2(bf2obj_2_msg.transform.translation.y, bf2obj_2_msg.transform.translation.x);
+//     return angle;
+
+// }
+
 void
 FindBlueGoal::imageCb(const sensor_msgs::Image::ConstPtr& msg)
 {
